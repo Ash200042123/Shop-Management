@@ -1,6 +1,6 @@
-import { PrismaClient, Role } from "@prisma/client";
+import { Role } from "@prisma/client";
+import { prisma } from "../db";
 
-const prisma = new PrismaClient();
 
 export const findUser = async(email:string)=>{
     return await prisma.user.findUnique({where: {email},});

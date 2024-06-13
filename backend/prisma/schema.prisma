@@ -45,7 +45,7 @@ model Order{
   status Status @default(Pending)
   products Json
   user User @relation(fields: [userId], references: [id])
-  invoiceId Int
+  invoiceId Int?
   invoice Invoice?
   //  @relation(fields: [invoiceId],references: [id])
 }
@@ -63,7 +63,7 @@ model Invoice{
 
 model Product{
   id Int @id @default(autoincrement())
-  name String
+  name String @unique
   description String
   price Float
   stock Int
