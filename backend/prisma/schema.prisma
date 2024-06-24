@@ -47,7 +47,6 @@ model Order{
   user User @relation(fields: [userId], references: [id])
   invoiceId Int?
   invoice Invoice?
-  //  @relation(fields: [invoiceId],references: [id])
 }
 
 model Invoice{
