@@ -1,6 +1,6 @@
 
 import { Request, Response } from 'express';
-import { signup, updatePassword, updateUnitSoldsByUserService } from '../services/user-service';
+import { loginUser, signup, updatePassword, updateUnitSoldsByUserService } from '../services/user-service';
 
 export const signupController = async (req: Request, res:Response)=>{
     const {email, password, role, name} = req.body;
@@ -19,6 +19,21 @@ export const signupController = async (req: Request, res:Response)=>{
     }
 };
 
+export const loginController = async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+  
+    try {
+      if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
+      }
+  
+      const { token, user } = await loginUser(email, password);
+      return res.status(200).json({ token, user });
+    } catch (error) {
+      console.error('Error occurred:', error);
+      return res.status(401).json({ error: "Internal Server Error" });
+    }
+  };
 
 export const updatePasswordController = async (req: Request, res: Response) => {
     const { userId, newPassword } = req.body;
