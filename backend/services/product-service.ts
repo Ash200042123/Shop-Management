@@ -1,4 +1,4 @@
-import { createProduct, deleteProductByName, findAllProducts, findProduct, updateProductByName } from "../repositories/product-repository"
+import { createProduct, deleteProductByName, findAllProducts, findProduct, findProductById, updateProductByName } from "../repositories/product-repository"
 
 
 export const addProduct = async(name:string, description:string, price:number, stock:number) =>{
@@ -24,6 +24,22 @@ export const getProductByName = async(name:string)=>{
         throw new Error('Product name is required!');
     }
     const product=await findProduct(name);
+
+    if(!product){
+        const error: any = new Error('Product not found!');
+        error.code = 'PRODUCT_NOT_FOUND';
+        throw error;
+    }
+
+    return product;
+}
+
+
+export const getProductById = async(productId:number)=>{
+    if(!productId){
+        throw new Error('Product ID is required!');
+    }
+    const product=await findProductById(productId);
 
     if(!product){
         const error: any = new Error('Product not found!');

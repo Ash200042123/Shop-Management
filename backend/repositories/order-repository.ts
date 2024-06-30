@@ -1,7 +1,7 @@
 import { Status } from "@prisma/client";
 import { prisma } from "../db";
 
-export const createOrder = async(userId:number,products:{productId:number; quantity:number}[])=>{
+export const createOrder = async(userId:number,customerName:string, products:{productId:number; quantity:number}[])=>{
 
     const productData = products.map(product=>({
         productId:product.productId,
@@ -11,6 +11,7 @@ export const createOrder = async(userId:number,products:{productId:number; quant
     return await prisma.order.create({
         data:{
             userId,
+            customerName:customerName,
             products:JSON.stringify(productData),
         }
     })

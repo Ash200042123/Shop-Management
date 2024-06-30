@@ -17,9 +17,9 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link } from "lucide-react";
 import { ChangeEvent, useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 
 
@@ -143,7 +143,7 @@ export function Signup() {
           </div>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
-            <Link href="/login" className="underline">
+            <Link to="/login" className="underline">
               Sign in
             </Link>
           </div>

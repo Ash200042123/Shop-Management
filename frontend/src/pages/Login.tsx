@@ -9,8 +9,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import axios from "axios";
-import { Link } from "lucide-react";
 import { ChangeEvent, useState } from "react";
+import { Link } from "react-router-dom";
 
 export function Login() {
   const [formValues, setFormValues] = useState({
@@ -73,7 +73,7 @@ export function Login() {
               <div className="flex items-center">
                 <Label htmlFor="password">Password</Label>
                 <Link
-                  href="#"
+                  to="#"
                   className="ml-auto inline-block text-sm underline"
                 >
                   Forgot your password?
@@ -94,7 +94,7 @@ export function Login() {
           </div>
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="underline">
+            <Link to="/signup" className="underline">
               Sign up
             </Link>
           </div>

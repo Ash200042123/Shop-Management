@@ -3,6 +3,8 @@ import { createInvoice } from "../repositories/invoice-repository";
 import { createOrder, deleteOrderById, deleteOrderByUser, getAllOrders, getOrdersByOrderId, getOrdersByUserId, updateOrderStatus, updateOrderWithInvoiceId } from "../repositories/order-repository";
 import { findProductById } from "../repositories/product-repository";
 import { deleteInvoiceByOrderService } from "./invoice-service";
+import { getProductById } from "./product-service";
+import { findUserById } from "../repositories/user-repository";
 
 const calculateOrderTotal = async(products:{productId:number; quantity:number}[])=>{
     let total=0;
@@ -18,8 +20,8 @@ const calculateOrderTotal = async(products:{productId:number; quantity:number}[]
 }
 
 
-export const createOrderService = async(userId:number,products:{productId:number; quantity:number}[])=>{
-    const newOrder = await createOrder(userId,products);
+export const createOrderService = async(userId:number,customerName:string,products:{productId:number; quantity:number}[])=>{
+    const newOrder = await createOrder(userId,customerName,products);
 
     const totalOrderAmount = await calculateOrderTotal(products);
     const newInvoice = await createInvoice(newOrder.id, userId, totalOrderAmount);
@@ -40,7 +42,37 @@ export const getOrderByOrderId = async(orderId:number)=>{
     if (!order) {
         throw new Error('Order not found!');
     }
-    return {order};
+
+    const products = JSON.parse(order.products as string);
+
+  
+  const productsWithDetails = await Promise.all(
+    products.map(async (product: any) => {
+      const productDetails = await getProductById(product.productId);
+      const productName = productDetails ? productDetails.name : 'Product Not Found';
+      const productPrice = productDetails ? productDetails.price : 'Product Not Found';
+      return {
+        ...product,
+        productName,
+        productPrice,
+        quantity: product.quantity, 
+      };
+    })
+  );
+
+  const user = await findUserById(order.userId);
+  const employeeName = user?.name;
+
+  const orderTotal = await calculateOrderTotal(productsWithDetails);
+
+  const orderWithProductDetails = {
+    ...order,
+    products: productsWithDetails,
+    orderTotal: orderTotal, 
+    employeeName: employeeName
+  };
+
+  return { order: orderWithProductDetails };
 };
 
 
