@@ -11,6 +11,18 @@ export const findUserById = async(userId:number)=>{
 };
 
 
+export const findAllUsers = async () => {
+  return await prisma.user.findMany({
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+      unitsSold: true,
+    },
+  });
+};
+
 export const createUser = async(email:string, password:string, role:Role, name?:string)=>{
     return await prisma.user.create({
         data:{

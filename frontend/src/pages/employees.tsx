@@ -3,27 +3,29 @@ import {
   Home,
   LineChart,
   ListFilter,
+  MoreHorizontal,
   Package,
   Package2,
   PanelLeft,
+  PlusCircle,
   Search,
   ShoppingCart,
   Users2,
 } from "lucide-react";
-
 
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -37,7 +39,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   Table,
@@ -54,16 +55,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-export function Homepage() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const navigate = useNavigate();
+export function Employees() {
+  const [employees, setEmployees] = useState<User[]>([]);
 
   useEffect(() => {
-    const fetchOrders = async () => {
+    const fetchEmployees = async () => {
       try {
         const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -71,34 +71,39 @@ export function Homepage() {
           throw new Error("Backend URL is not defined");
         }
 
-        const response = await axios.get(`${backendUrl}/orders`); 
-        const fetchedOrders = response.data.orders.orders.map((order: any) => ({
-          id: order.id,
-          customerName: order.customerName,
-          userId: order.userId,
-          orderDate: new Date(order.orderDate).toLocaleString(),
-          status: order.status,
-          products: order.products, 
-          invoiceId: order.invoiceId,
-        }));
-        setOrders(fetchedOrders);
+        const response = await axios.get(`${backendUrl}/employees`);
+        const fetchedEmployees = response.data.users.map(
+          (employee: any) => ({
+            id: employee.id,
+            email: employee.email,
+            name: employee.name,
+            role: employee.role,
+            unitsSold: employee.unitsSold,
+          })
+        );
+        setEmployees(fetchedEmployees);
       } catch (error) {
         console.error("Error fetching orders:", error);
       }
     };
 
-    fetchOrders();
+    fetchEmployees();
   }, []);
 
+  const handleDelete = async (id: number) => {
+    try {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  const handleClick = (order:Order)=>{
-    navigate(`/orders/${order.id}`);
+      if (!backendUrl) {
+        throw new Error("Backend URL is not defined");
+      }
+
+      const response = await axios.delete(`${backendUrl}/employees/${id}`);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const handleOrderClick = ()=>{
-    navigate('/orders/create')
-  }
-  
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <TooltipProvider>
@@ -116,7 +121,7 @@ export function Homepage() {
               <TooltipTrigger asChild>
                 <Link
                   to="/"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <Home className="h-5 w-5" />
                   <span className="sr-only">Dashboard</span>
@@ -128,7 +133,7 @@ export function Homepage() {
               <TooltipTrigger asChild>
                 <Link
                   to="/"
-                  className="fflex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <ShoppingCart className="h-5 w-5" />
                   <span className="sr-only">Orders</span>
@@ -152,7 +157,7 @@ export function Homepage() {
               <TooltipTrigger asChild>
                 <Link
                   to="/employees"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <Users2 className="h-5 w-5" />
                   <span className="sr-only">Employees</span>
@@ -175,7 +180,7 @@ export function Homepage() {
           </nav>
         </aside>
         <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-          <header className="sticky top-0 z-30 flex items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+          <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
             <Sheet>
               <SheetTrigger asChild>
                 <Button size="icon" variant="outline" className="sm:hidden">
@@ -237,7 +242,10 @@ export function Homepage() {
                     <Link to="/">Dashboard</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
-                
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Employees</BreadcrumbPage>
+                </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
             <div className="relative ml-auto flex-1 md:grow-0">
@@ -272,142 +280,150 @@ export function Homepage() {
             </DropdownMenu>
           </header>
           <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-            <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
-              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-                <Card className="sm:col-span-2" x-chunk="dashboard-05-chunk-0">
-                  <CardHeader className="pb-3">
-                    <CardTitle>Your Orders</CardTitle>
-                    <CardDescription className="max-w-lg text-balance leading-relaxed">
-                      Introducing Our Dynamic Orders Dashboard for Seamless
-                      Management and Insightful Analysis.
+            <Tabs defaultValue="all">
+              <div className="flex items-center">
+                <TabsList>
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="active">Active</TabsTrigger>
+                  <TabsTrigger value="draft">Draft</TabsTrigger>
+                  <TabsTrigger value="archived" className="hidden sm:flex">
+                    Archived
+                  </TabsTrigger>
+                </TabsList>
+                <div className="ml-auto flex items-center gap-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-8 gap-1">
+                        <ListFilter className="h-3.5 w-3.5" />
+                        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                          Filter
+                        </span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuCheckboxItem checked>
+                        Active
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem>Draft</DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem>
+                        Archived
+                      </DropdownMenuCheckboxItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <Button size="sm" variant="outline" className="h-8 gap-1">
+                    <File className="h-3.5 w-3.5" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                      Export
+                    </span>
+                  </Button>
+                  <Link to="/employees/add">
+                    <Button size="sm" className="h-8 gap-1">
+                      <PlusCircle className="h-3.5 w-3.5" />
+                      <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                        Add Employee
+                      </span>
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+              <TabsContent value="all">
+                <Card x-chunk="dashboard-06-chunk-0">
+                  <CardHeader>
+                    <CardTitle>Employees</CardTitle>
+                    <CardDescription>
+                      Manage your employees and view their sales.
                     </CardDescription>
                   </CardHeader>
-                  <CardFooter>
-                    <Button onClick={handleOrderClick}>Create New Order</Button>
-                  </CardFooter>
-                </Card>
-                <Card x-chunk="dashboard-05-chunk-1">
-                  <CardHeader className="pb-2">
-                    <CardDescription>This Week</CardDescription>
-                    <CardTitle className="text-4xl">$1,329</CardTitle>
-                  </CardHeader>
                   <CardContent>
-                    <div className="text-xs text-muted-foreground">
-                      +25% from last week
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Progress value={25} aria-label="25% increase" />
-                  </CardFooter>
-                </Card>
-                <Card x-chunk="dashboard-05-chunk-2">
-                  <CardHeader className="pb-2">
-                    <CardDescription>This Month</CardDescription>
-                    <CardTitle className="text-4xl">$5,329</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-xs text-muted-foreground">
-                      +10% from last month
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Progress value={12} aria-label="12% increase" />
-                  </CardFooter>
-                </Card>
-              </div>
-              <Tabs defaultValue="week">
-                <div className="flex items-center">
-                  <TabsList>
-                    <TabsTrigger value="week">Week</TabsTrigger>
-                    <TabsTrigger value="month">Month</TabsTrigger>
-                    <TabsTrigger value="year">Year</TabsTrigger>
-                  </TabsList>
-                  <div className="ml-auto flex items-center gap-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 gap-1 text-sm"
-                        >
-                          <ListFilter className="h-3.5 w-3.5" />
-                          <span className="sr-only sm:not-sr-only">Filter</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuCheckboxItem checked>
-                          Fulfilled
-                        </DropdownMenuCheckboxItem>
-                        <DropdownMenuCheckboxItem>
-                          Declined
-                        </DropdownMenuCheckboxItem>
-                        <DropdownMenuCheckboxItem>
-                          Refunded
-                        </DropdownMenuCheckboxItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-7 gap-1 text-sm"
-                    >
-                      <File className="h-3.5 w-3.5" />
-                      <span className="sr-only sm:not-sr-only">Export</span>
-                    </Button>
-                  </div>
-                </div>
-                <TabsContent value="week">
-                  <Card x-chunk="dashboard-05-chunk-3">
-                    <CardHeader className="px-7">
-                      <CardTitle>Orders</CardTitle>
-                      <CardDescription>
-                        Recent orders from your store.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Customer Name</TableHead>
-                            <TableHead className="hidden sm:table-cell">
-                              Employee
-                            </TableHead>
-                            <TableHead className="hidden sm:table-cell">
-                              Status
-                            </TableHead>
-                            <TableHead className="hidden md:table-cell">
-                              Date
-                            </TableHead>
-                            <TableHead className="text-right">Amount</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {orders.map((order) => (
-                            <TableRow key={order.id} onClick={()=>handleClick(order)} className="cursor-pointer">
-                              <TableCell className="font-medium">
-                                {order.customerName}
-                              </TableCell>
-                              <TableCell className="font-medium">
-                                {order.userId}
-                              </TableCell>
-                              <TableCell>{order.status}</TableCell>
-                              <TableCell className="hidden md:table-cell">
-                              {order.orderDate}
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="hidden w-[100px] sm:table-cell">
+                            <span className="sr-only">Image</span>
+                          </TableHead>
+                          <TableHead>Name</TableHead>
+                          <TableHead className="hidden md:table-cell">
+                            Email
+                          </TableHead>
+                          <TableHead className="hidden md:table-cell">
+                            Role
+                          </TableHead>
+                          <TableHead className="hidden md:table-cell">
+                            Total Units Sold
+                          </TableHead>
+
+                          <TableHead>
+                            <span className="sr-only">Actions</span>
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {employees.map((employee) => (
+                          <TableRow key={employee.id}>
+                            <TableCell className="hidden sm:table-cell">
+                              <img
+                                alt="Employee Image"
+                                className="aspect-square rounded-md object-cover"
+                                height="64"
+                                src="/placeholder.svg"
+                                width="64"
+                              />
                             </TableCell>
-                              <TableCell className="text-right">
-                                500
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
-            </div>
+                            <TableCell className="font-medium">
+                              {employee.name}
+                            </TableCell>
+
+                            <TableCell className="hidden md:table-cell">
+                              {employee.email}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {employee.role}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {employee.unitsSold}
+                            </TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    aria-haspopup="true"
+                                    size="icon"
+                                    variant="ghost"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">Toggle menu</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
+                                  <DropdownMenuItem>
+                                    <Link
+                                      to={`/employees/${employee.name}`}
+                                    >
+                                      Edit
+                                    </Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      handleDelete(employee.id);
+                                    }}
+                                  >
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </main>
         </div>
       </TooltipProvider>

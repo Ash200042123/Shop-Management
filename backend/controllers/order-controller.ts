@@ -9,11 +9,12 @@ export const createOrderController = async (req: Request, res: Response) => {
     const { userId,customerName, products } = req.body;
 
     try {
-        if (!userId || !products || !Array.isArray(products) || products.length === 0) {
+        const userIdInt = parseInt(userId, 10);
+        if (!userIdInt || !products || !Array.isArray(products) || products.length === 0) {
             return res.status(400).json({ error: 'Invalid order data!' });
         }
 
-        const { order, invoice } = await createOrderService(userId,customerName, products);
+        const { order, invoice } = await createOrderService(userIdInt,customerName, products);
         return res.status(200).json({ message: 'Order created successfully!', order, invoice });
     } catch (error) {
         console.error('Error occurred:', error);
@@ -76,8 +77,8 @@ export const updateOrderStatusController = async(req:Request, res:Response)=>{
     const {orderId, status}=req.body;
 
     try {
-        
-        if(!orderId || !status){
+        const orderIntId = parseInt(orderId);
+        if(!orderIntId || !status){
             return res.status(400).json({message:"Order ID and Status is required"});
         }
 
@@ -85,7 +86,7 @@ export const updateOrderStatusController = async(req:Request, res:Response)=>{
             return res.status(400).json({ error: 'Invalid status value!' });
         }
 
-        const order = await updateOrderStatusService(orderId,status);
+        const order = await updateOrderStatusService(orderIntId,status);
         return res.status(200).json({order});
     } catch (error) {
         console.error('Error occured',error);

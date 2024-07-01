@@ -1,6 +1,6 @@
 
 import { Request, Response } from 'express';
-import { loginUser, signup, updatePassword, updateUnitSoldsByUserService } from '../services/user-service';
+import { getAllUsers, loginUser, signup, updatePassword, updateUnitSoldsByUserService } from '../services/user-service';
 
 export const signupController = async (req: Request, res:Response)=>{
     const {email, password, role, name} = req.body;
@@ -52,6 +52,16 @@ export const updatePasswordController = async (req: Request, res: Response) => {
   };
 
 
+  export const getAllUsersController = async(req:Request,res:Response)=>{
+    try{
+        const users = await getAllUsers();
+        return res.status(200).json({users:users});
+    }catch(error){
+        console.error('Error occured:',error);
+        return res.status(500).json({error:'Internal Server Error'});
+    }
+}
+
 
 export const updateUnitSoldsByUserController = async(req:Request, res:Response)=>{
     const {email, newUnitsSold} = req.body;
@@ -68,3 +78,5 @@ export const updateUnitSoldsByUserController = async(req:Request, res:Response)=
         return res.status(500).json({error:'Internal Server Error'});
     }
 };
+
+

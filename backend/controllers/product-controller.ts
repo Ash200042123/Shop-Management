@@ -10,7 +10,14 @@ export const addProductController = async(req:Request, res:Response)=>{
             return res.status(400).json({error: 'Please fillup all the fields!'});
         }
 
-        const newProduct = await addProduct(name, description, price, stock);
+        const priceFloat = parseFloat(price);
+        const stockInt = parseInt(stock); 
+
+        if (isNaN(priceFloat) || priceFloat <= 0  || isNaN(stockInt) || stockInt <= 0) {
+            return res.status(400).json({ error: 'Invalid price value!' });
+        }
+
+        const newProduct = await addProduct(name, description, priceFloat, stockInt);
         return res.status(200).json({message:'Product Added!', product: newProduct});
     }catch(error){
         console.error('Error occured:',error);
@@ -62,8 +69,9 @@ export const updateProductController= async(req:Request, res:Response)=>{
 
     try {
         if(name===undefined) return res.status(400).json({error: 'Please provide a name!'});
-
-        const product=await updateProduct(name,updatedName, description, price, stock);
+        const priceFloat = parseFloat(price);
+        const stockInt = parseInt(stock); 
+        const product=await updateProduct(name,updatedName, description, priceFloat, stockInt);
         return res.status(200).json({product:product});
     }catch (error: any) {
         if (error.message === 'Product name is required!') {
@@ -79,8 +87,8 @@ export const updateProductController= async(req:Request, res:Response)=>{
 
 
 export const deleteProductController = async(req:Request,res:Response)=>{
-    const { name} = req.body;
-
+    
+    const name = req.params.name;
     try {
         if(name===undefined) return res.status(400).json({error: 'Please provide a name!'});
 

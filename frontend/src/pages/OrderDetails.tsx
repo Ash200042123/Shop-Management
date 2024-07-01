@@ -69,6 +69,7 @@ import axios from "axios";
 
 export function OrderDetailsPage() {
   const [order, setOrder] = useState<Order>();
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
   const { orderId } = useParams();
 
   useEffect(() => {
@@ -82,6 +83,7 @@ export function OrderDetailsPage() {
         const response = await axios.get(`${backendUrl}/orders/${orderId}`);
 
         setOrder(response.data.order);
+        setSelectedStatus(response.data.order.status);
         console.log(response.data.order);
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -94,13 +96,32 @@ export function OrderDetailsPage() {
   if (!order) {
     return <div>Loading...</div>;
   }
+
+  const handleSubmit = async () => {
+    try {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+      if (!backendUrl) {
+        throw new Error("Backend URL is not defined");
+      }
+
+      const response = await axios.put(`${backendUrl}/orders`, {
+        orderId,
+        status: selectedStatus,
+      });
+      console.log(response);
+    } catch (error) {
+      console.error("Error updating order:", error);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen w-full bg-muted/40 p-4">
       <TooltipProvider>
         <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
           <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
             <Link
-              to="#"
+              to="/"
               className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
             >
               <Package2 className="h-4 w-4 transition-all group-hover:scale-110" />
@@ -110,7 +131,7 @@ export function OrderDetailsPage() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  to="#"
+                  to="/"
                   className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <Home className="h-5 w-5" />
@@ -122,7 +143,7 @@ export function OrderDetailsPage() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  to="#"
+                  to="/"
                   className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <ShoppingCart className="h-5 w-5" />
@@ -134,7 +155,7 @@ export function OrderDetailsPage() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  to="#"
+                  to="/products"
                   className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <Package className="h-5 w-5" />
@@ -146,7 +167,7 @@ export function OrderDetailsPage() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  to="#"
+                  to="/employees"
                   className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <Users2 className="h-5 w-5" />
@@ -158,7 +179,7 @@ export function OrderDetailsPage() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  to="#"
+                  to="/sales"
                   className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <LineChart className="h-5 w-5" />
@@ -181,42 +202,42 @@ export function OrderDetailsPage() {
               <SheetContent side="left" className="sm:max-w-xs">
                 <nav className="grid gap-6 text-lg font-medium">
                   <Link
-                    to="#"
+                    to="/"
                     className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
                   >
                     <Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
                     <span className="sr-only">Shop Management</span>
                   </Link>
                   <Link
-                    to="#"
+                    to="/"
                     className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                   >
                     <Home className="h-5 w-5" />
                     Dashboard
                   </Link>
                   <Link
-                    to="#"
+                    to="/"
                     className="flex items-center gap-4 px-2.5 text-foreground"
                   >
                     <ShoppingCart className="h-5 w-5" />
                     Orders
                   </Link>
                   <Link
-                    to="#"
+                    to="/products"
                     className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                   >
                     <Package className="h-5 w-5" />
                     Products
                   </Link>
                   <Link
-                    to="#"
+                    to="/employees"
                     className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                   >
                     <Users2 className="h-5 w-5" />
                     Employees
                   </Link>
                   <Link
-                    to="#"
+                    to="/sales"
                     className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                   >
                     <LineChart className="h-5 w-5" />
@@ -313,13 +334,17 @@ export function OrderDetailsPage() {
                 <div className="grid gap-3">
                   <div className="font-semibold">Order Details</div>
                   <ul className="grid gap-3">
-                    {order.products.map((product)=>(
-                        <li key={product.productId} className="flex items-center justify-between">
-                      <span className="text-muted-foreground">
-                        {product.productName} x <span>{product.quantity}</span>
-                      </span>
-                      <span>৳{product.productPrice}</span>
-                    </li>
+                    {order.products.map((product) => (
+                      <li
+                        key={product.productId}
+                        className="flex items-center justify-between"
+                      >
+                        <span className="text-muted-foreground">
+                          {product.productName} x{" "}
+                          <span>{product.quantity}</span>
+                        </span>
+                        <span>৳{product.productPrice}</span>
+                      </li>
                     ))}
                   </ul>
                   <Separator className="my-2" />
@@ -345,7 +370,6 @@ export function OrderDetailsPage() {
                         <a href="mailto:liam@acme.com">liam@acme.com</a>
                       </dd>
                     </div> */}
-                    
                   </dl>
                 </div>
 
@@ -363,10 +387,8 @@ export function OrderDetailsPage() {
                         <a href="mailto:liam@acme.com">{order.employeeName}</a>
                       </dd>
                     </div>
-                    
                   </dl>
                 </div>
-
 
                 <Separator className="my-4" />
                 <div className="grid gap-3">
@@ -380,18 +402,18 @@ export function OrderDetailsPage() {
                       <dd>
                         <Select
                           name="status"
-                          //   value={formValues.role}
-                          //   onValueChange={handleRoleChange}
+                          value={selectedStatus}
+                          onValueChange={setSelectedStatus} 
                         >
                           <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Status" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="confirmed">Confirmed</SelectItem>
-                            <SelectItem value="shipped">Shipped</SelectItem>
-                            <SelectItem value="completed">Completed</SelectItem>
-                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                            <SelectItem value="Pending">Pending</SelectItem>
+                            <SelectItem value="Confirmed">Confirmed</SelectItem>
+                            <SelectItem value="Shipped">Shipped</SelectItem>
+                            <SelectItem value="Completed">Completed</SelectItem>
+                            <SelectItem value="Cancelled">Cancelled</SelectItem>
                           </SelectContent>
                         </Select>
                       </dd>
@@ -400,7 +422,7 @@ export function OrderDetailsPage() {
                       <Button
                         type="submit"
                         className="w-[70%]"
-                        onClick={() => {}}
+                        onClick={handleSubmit}
                       >
                         Update
                       </Button>

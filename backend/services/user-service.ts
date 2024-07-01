@@ -1,6 +1,6 @@
 import { Role } from "@prisma/client";
 import bcrypt from "bcrypt";
-import { createUser, findUser, updatePasswordByUserId, updateUserUnitsSold } from "../repositories/user-repository";
+import { createUser, findAllUsers, findUser, updatePasswordByUserId, updateUserUnitsSold } from "../repositories/user-repository";
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -41,6 +41,13 @@ export const loginUser = async (email: string, password: string) => {
 
   return { token, user };
 };
+
+
+export const getAllUsers = async()=>{
+  const users = await findAllUsers();
+  return users;
+};
+
 
 
 export const updatePassword = async (userId: number, newPassword: string) => {

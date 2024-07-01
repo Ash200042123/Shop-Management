@@ -10,6 +10,11 @@ import { Signup } from './pages/Signup';
 import { Login } from './pages/Login';
 import { Homepage } from './pages/Orders';
 import { OrderDetailsPage } from './pages/OrderDetails';
+import { CreateOrder } from './pages/Create-Order';
+import { Products } from './pages/Products';
+import { CreateProduct } from './pages/create-product';
+import { EditProduct } from './pages/edit-product';
+import { Employees } from './pages/employees';
 
 const router = createBrowserRouter([
   {
@@ -28,6 +33,26 @@ const router = createBrowserRouter([
   {
     path: "/orders/:orderId",
     element: <OrderDetailsPage />,
+  },
+  {
+    path: "/orders/create",
+    element: <CreateOrder />,
+  },
+  {
+    path: "/products",
+    element: <Products />,
+  },
+  {
+    path: "/products/add",
+    element: <CreateProduct />,
+  },
+  {
+    path: "/products/:productName",
+    element: <EditProduct />,
+  },
+  {
+    path: "/employees",
+    element: <Employees />,
   },
 ]);
 
