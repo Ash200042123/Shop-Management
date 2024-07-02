@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { deleteInvoiceByOrderController, deleteInvoiceByUserController, getAllInvoicesController, getInvoiceByOrderIdController, getInvoiceByUserIdController } from "../controllers/invoice-controller";
+import { deleteInvoiceByOrderController, deleteInvoiceByUserController, getAllInvoicesController, getInvoiceByIdController, getInvoiceByOrderIdController, getInvoiceByUserIdController } from "../controllers/invoice-controller";
 
 
 const router = Router();
 
+router.get('/invoices/:id', getInvoiceByIdController);
 router.get('/invoices/:orderId', getInvoiceByOrderIdController);
 router.get('/invoices/:userId', getInvoiceByUserIdController);
 router.get('/invoices', getAllInvoicesController);

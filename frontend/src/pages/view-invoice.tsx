@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -6,18 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Tooltip,
   TooltipContent,
@@ -32,9 +20,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import axios from "axios";
-import { ChangeEvent, useState } from "react";
-import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Link, useParams } from "react-router-dom";
 import {
   Home,
   LineChart,
@@ -44,56 +31,66 @@ import {
   Users2,
   PanelLeft,
   Search,
+  MoreHorizontal,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
 
+interface Product {
+  productId: number;
+  quantity: number;
+}
 
-export function CreateProduct() {
-  const [formValues, setFormValues] = useState<{
-    name: string;
-    description: string;
-    price: number;
-    quantity: number;
-  }>({
-    name: "",
-    description: "",
-    price: 0,
-    quantity: 0,
-  });
+interface Invoice {
+  id: number;
+  userId: number;
+  customerName: string;
+  employeeName: string;
+  products: Product[]; // Updated to use Product interface
+  invoiceDate: string;
+  totalAmount: number;
+}
 
-  const [errors, setErrors] = useState<string[]>([]);
+export function ViewInvoice() {
+  const { invoiceId } = useParams();
+  const [invoice, setInvoice] = useState<Invoice | null>(null); // Updated to use Invoice interface
 
-  const handleFieldChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormValues((prevValues) => ({ ...prevValues, [name]: value }));
-  };
+  useEffect(() => {
+    const fetchInvoice = async () => {
+      try {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  const handleSubmit = async () => {
-    if (formValues.price <= 0 || formValues.quantity <= 0) {
-      setErrors(["Price and Quantity must be greater than 0."]);
-      return;
-    }
-
-    try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-      if (!backendUrl) {
-        throw new Error("Backend URL is not defined");
-      }
-
-      const response = await axios.post(
-        `${backendUrl}/add-product`,
-        {
-            name: formValues.name,
-            description: formValues.description,
-            price: formValues.price,
-            stock: formValues.quantity
+        if (!backendUrl) {
+          throw new Error("Backend URL is not defined");
         }
-      );
-      console.log(response);
-    } catch (error) {
-      console.error("Error creating product:", error);
-    }
-  };
+
+        const response = await axios.get<Invoice>(
+          `${backendUrl}/invoices/${invoiceId}`
+        );
+        setInvoice(response.data);
+      } catch (error) {
+        console.error("Error fetching invoice:", error);
+      }
+    };
+
+    fetchInvoice();
+  }, [invoiceId]);
+
+  if (!invoice) {
+    return null; // Handle loading state or error here
+  }
+
+  // Parse products JSON string to array
+  const products = JSON.parse(invoice.products);
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-muted/40 p-4">
@@ -123,8 +120,8 @@ export function CreateProduct() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  to="/invoices"
-                  className="fflex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                  to="/"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <ShoppingCart className="h-5 w-5" />
                   <span className="sr-only">Invoices</span>
@@ -136,7 +133,7 @@ export function CreateProduct() {
               <TooltipTrigger asChild>
                 <Link
                   to="/products"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <Package className="h-5 w-5" />
                   <span className="sr-only">Products</span>
@@ -170,6 +167,7 @@ export function CreateProduct() {
             </Tooltip>
           </nav>
         </aside>
+
         <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
           <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
             <Sheet>
@@ -196,7 +194,7 @@ export function CreateProduct() {
                     Dashboard
                   </Link>
                   <Link
-                    to="/invoices"
+                    to="/"
                     className="flex items-center gap-4 px-2.5 text-foreground"
                   >
                     <ShoppingCart className="h-5 w-5" />
@@ -235,7 +233,13 @@ export function CreateProduct() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Add Product</BreadcrumbPage>
+                  <BreadcrumbPage>
+                    <Link to="/invoices">Invoices</Link>
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>View Invoice</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -269,77 +273,74 @@ export function CreateProduct() {
                 <DropdownMenuItem>Logout</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <Button size="icon" variant="outline" className="md:hidden">
+              <MoreHorizontal className="h-4 w-4" />
+              <span className="sr-only">Open Menu</span>
+            </Button>
           </header>
-          <main className="flex-1 space-y-4 p-4 pt-2 sm:p-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create Product</CardTitle>
+          <div className="sm:py-8 sm:px-8">
+            <Card className="w-full p-6 shadow-md">
+              <CardHeader className="space-y-1">
+                <CardTitle className="text-2xl">View Invoice</CardTitle>
                 <CardDescription>
-                  Fill out the form below to create a new product.
+                  View detailed information about the invoice.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="grid gap-6">
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Product Name</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      value={formValues.name}
-                      onChange={handleFieldChange}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Input
-                      id="description"
-                      name="description"
-                      value={formValues.description}
-                      onChange={(e) => handleFieldChange(e)}
-                    />
-                  </div>
+              <CardContent className="grid gap-4">
+                <div className="grid gap-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Invoice ID
+                  </label>
+                  <span className="text-lg font-semibold">{invoice.id}</span>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="price">Price</Label>
-                    <Input
-                      id="price"
-                      name="price"
-                      type="number"
-                      value={formValues.price.toString()}
-                      onChange={handleFieldChange}
-                      min="0"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="quantity">Quantity</Label>
-                    <Input
-                      id="quantity"
-                      name="quantity"
-                      type="number"
-                      value={formValues.quantity.toString()}
-                      onChange={handleFieldChange}
-                      min="0"
-                    />
-                  </div>
+                <div className="grid gap-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Customer Name
+                  </label>
+                  <span className="text-lg font-semibold">
+                    {invoice.customerName}
+                  </span>
                 </div>
-                {errors.length > 0 && (
-                  <div className="text-red-500">
-                    {errors.map((error, index) => (
-                      <div key={index}>{error}</div>
+                <div className="grid gap-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Employee Name
+                  </label>
+                  <span className="text-lg font-semibold">
+                    {invoice.employeeName}
+                  </span>
+                </div>
+                <div className="grid gap-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Products
+                  </label>
+                  <ul className="list-disc list-inside">
+                    {products.map((product: Product) => (
+                      <li
+                        key={product.productId}
+                      >{`Product ID: ${product.productId}, Quantity: ${product.quantity}`}</li>
                     ))}
-                  </div>
-                )}
-                <Button
-                  onClick={handleSubmit}
-                  className="flex justify-center items-center w-1/2 mx-auto"
-                >
-                  Submit
-                </Button>
+                  </ul>
+                </div>
+                <div className="grid gap-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Invoice Date
+                  </label>
+                  <span className="text-lg font-semibold">
+                    {new Date(invoice.invoiceDate).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="grid gap-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Total Amount
+                  </label>
+                  <span className="text-lg font-semibold">
+                    {invoice.totalAmount}
+                  </span>
+                </div>
               </CardContent>
             </Card>
-          </main>
+          </div>
         </div>
       </TooltipProvider>
     </div>

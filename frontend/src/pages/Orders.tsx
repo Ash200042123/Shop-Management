@@ -54,13 +54,19 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { getCookie } from "@/utils/cookie-utils";
 
 export function Homepage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const navigate = useNavigate();
+
+  const token = getCookie();
+  if(!token){
+    <Navigate to="/login" replace />
+  }
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -127,14 +133,14 @@ export function Homepage() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  to="/"
+                  to="/invoices"
                   className="fflex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <ShoppingCart className="h-5 w-5" />
-                  <span className="sr-only">Orders</span>
+                  <span className="sr-only">Invoices</span>
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side="right">Orders</TooltipContent>
+              <TooltipContent side="right">Invoices</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -200,11 +206,11 @@ export function Homepage() {
                     Dashboard
                   </Link>
                   <Link
-                    to="/"
+                    to="/invoices"
                     className="flex items-center gap-4 px-2.5 text-foreground"
                   >
                     <ShoppingCart className="h-5 w-5" />
-                    Orders
+                    Invoices
                   </Link>
                   <Link
                     to="/products"

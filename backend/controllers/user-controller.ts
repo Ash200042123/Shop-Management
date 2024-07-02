@@ -1,6 +1,6 @@
 
 import { Request, Response } from 'express';
-import { getAllUsers, loginUser, signup, updatePassword, updateUnitSoldsByUserService } from '../services/user-service';
+import { deleteUser, getAllUsers, getUser, loginUser, signup, updateEmail, updatePassword, updateUnitSoldsByUserService } from '../services/user-service';
 
 export const signupController = async (req: Request, res:Response)=>{
     const {email, password, role, name} = req.body;
@@ -51,6 +51,47 @@ export const updatePasswordController = async (req: Request, res: Response) => {
     }
   };
 
+  export const updateEmailController = async (req: Request, res: Response) => {
+    const userId = req.params.userId;
+    const { email } = req.body;
+  
+    try {
+      if (!userId || !email) {
+        return res.status(400).json({ error: 'User ID and email are required' });
+      }
+      const userIdInt = parseInt(userId);
+      const updatedUser = await updateEmail(userIdInt, email);
+      return res.status(200).json({ message: 'Email updated successfully', user: updatedUser });
+    } catch (error) {
+      console.error('Error occurred:', error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
+
+
+  export const getUserController = async(req:Request, res:Response)=>{
+    const userId = req.params.userId;
+
+    try{
+        if(userId===undefined) return res.status(400).json({error: 'Please provide a ID!'});
+        const userIdInt = parseInt(userId)
+        const user= await getUser(userIdInt);
+
+        if(!user) return res.status(500).json({message:'No users found'});
+
+        return res.status(200).json({user:user});
+
+    }catch (error: any) {
+        if (error.message === 'User name is required!') {
+            return res.status(400).json({ error: error.message });
+        } else if (error.code === 'USER_NOT_FOUND') {
+            return res.status(404).json({ error: error.message });
+        } else {
+            console.error('Error occurred:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+}
 
   export const getAllUsersController = async(req:Request,res:Response)=>{
     try{
@@ -80,3 +121,24 @@ export const updateUnitSoldsByUserController = async(req:Request, res:Response)=
 };
 
 
+
+
+export const deleteUserController = async(req:Request,res:Response)=>{
+    
+  const id = req.params.id;
+  try {
+      if(id===undefined) return res.status(400).json({error: 'Please provide a ID!'});
+      const idInt = parseInt(id);
+      const user=await deleteUser(idInt);
+      return res.status(200).json({user:user});
+  }catch (error: any) {
+      if (error.message === 'User ID is required!') {
+          return res.status(400).json({ error: error.message });
+      } else if (error.code === 'USER_NOT_FOUND') {
+          return res.status(404).json({ error: error.message });
+      } else {
+          console.error('Error occurred:', error);
+          return res.status(500).json({ error: 'Internal Server Error' });
+      }
+  }
+}

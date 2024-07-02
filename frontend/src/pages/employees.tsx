@@ -132,14 +132,14 @@ export function Employees() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  to="/"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                  to="/invoices"
+                  className="fflex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <ShoppingCart className="h-5 w-5" />
-                  <span className="sr-only">Orders</span>
+                  <span className="sr-only">Invoices</span>
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side="right">Orders</TooltipContent>
+              <TooltipContent side="right">Invoices</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -205,11 +205,11 @@ export function Employees() {
                     Dashboard
                   </Link>
                   <Link
-                    to="/"
+                    to="/invoices"
                     className="flex items-center gap-4 px-2.5 text-foreground"
                   >
                     <ShoppingCart className="h-5 w-5" />
-                    Orders
+                    Invoices
                   </Link>
                   <Link
                     to="/products"
@@ -282,16 +282,16 @@ export function Employees() {
           <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
             <Tabs defaultValue="all">
               <div className="flex items-center">
-                <TabsList>
+                {/* <TabsList>
                   <TabsTrigger value="all">All</TabsTrigger>
                   <TabsTrigger value="active">Active</TabsTrigger>
                   <TabsTrigger value="draft">Draft</TabsTrigger>
                   <TabsTrigger value="archived" className="hidden sm:flex">
                     Archived
                   </TabsTrigger>
-                </TabsList>
+                </TabsList> */}
                 <div className="ml-auto flex items-center gap-2">
-                  <DropdownMenu>
+                  {/* <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm" className="h-8 gap-1">
                         <ListFilter className="h-3.5 w-3.5" />
@@ -311,7 +311,7 @@ export function Employees() {
                         Archived
                       </DropdownMenuCheckboxItem>
                     </DropdownMenuContent>
-                  </DropdownMenu>
+                  </DropdownMenu> */}
                   <Button size="sm" variant="outline" className="h-8 gap-1">
                     <File className="h-3.5 w-3.5" />
                     <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -401,7 +401,7 @@ export function Employees() {
 
                                   <DropdownMenuItem>
                                     <Link
-                                      to={`/employees/${employee.name}`}
+                                      to={`/employees/${employee.id}`}
                                     >
                                       Edit
                                     </Link>

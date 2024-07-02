@@ -1,5 +1,13 @@
-import { deleteInvoiceByOrderId, deleteInvoiceByUser, getAllInvoice, getInvoiceByOrderId, getInvoiceByUser } from "../repositories/invoice-repository"
+import { deleteInvoiceByOrderId, deleteInvoiceByUser, getAllInvoice, getInvoiceById, getInvoiceByOrderId, getInvoiceByUser } from "../repositories/invoice-repository"
 
+
+export async function getInvoiceByInvoiceId(id: number) {
+    const invoice = await getInvoiceById(id);
+    if (!invoice) {
+        throw new Error('Invoice not found!');
+    }
+    return invoice;
+  }
 
 
 export const getInvoiceByOrderService = async(orderId:number)=>{

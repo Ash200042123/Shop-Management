@@ -8,15 +8,17 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { setCookie } from "@/utils/cookie-utils";
 import axios from "axios";
 import { ChangeEvent, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export function Login() {
   const [formValues, setFormValues] = useState({
     email: "",
     password: "",
   });
+  const navigate = useNavigate();
 
   const handleFieldChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -26,21 +28,21 @@ export function Login() {
 
   const handleSubmit = async () => {
     try {
-      //   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+        const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-      //   if (!backendUrl) {
-      //     throw new Error("Backend URL is not defined");
-      //   }
+        if (!backendUrl) {
+          throw new Error("Backend URL is not defined");
+        }
       const response = await axios.post(
         // backendUrl+ "/signup",
-        "http://localhost:3000/api/login",
+        `${backendUrl}/login`,
         {
           email: formValues.email,
           password: formValues.password,
         }
       );
-
-      console.log(response);
+      setCookie(response.data.token);
+      navigate("/");
     } catch (error) {
       console.log(error);
     }

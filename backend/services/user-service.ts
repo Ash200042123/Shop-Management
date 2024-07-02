@@ -1,6 +1,6 @@
 import { Role } from "@prisma/client";
 import bcrypt from "bcrypt";
-import { createUser, findAllUsers, findUser, updatePasswordByUserId, updateUserUnitsSold } from "../repositories/user-repository";
+import { createUser, deleteUserById, findAllUsers, findUser, findUserById, updateEmailByUserId, updatePasswordByUserId, updateUserUnitsSold } from "../repositories/user-repository";
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -49,6 +49,21 @@ export const getAllUsers = async()=>{
 };
 
 
+export const getUser = async(userId:number)=>{
+  if(!userId){
+      throw new Error('User ID is required!');
+  }
+  const user=await findUserById(userId);
+
+  if(!user){
+      const error: any = new Error('User not found!');
+      error.code = 'USER_NOT_FOUND';
+      throw error;
+  }
+
+  return user;
+}
+
 
 export const updatePassword = async (userId: number, newPassword: string) => {
     if (!newPassword || newPassword.length < 6) {
@@ -61,7 +76,42 @@ export const updatePassword = async (userId: number, newPassword: string) => {
   };
 
 
+  export const updateEmail = async (userId: number, email: string) => {
+    if (!email || email.length < 6) {
+      throw new Error('Email must be at least 6 characters long');
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new Error('Invalid email format');
+  }
+  
+    const updatedUser = await updateEmailByUserId(userId, email);
+    return updatedUser;
+  };
+
+
 export const updateUnitSoldsByUserService = async (email:string, newUnitsSold:number)=>{
     const user = updateUserUnitsSold(email, newUnitsSold);
     return user;
 };
+
+
+
+
+export const deleteUser= async(id:number)=>{
+  if(!id){
+      throw new Error('Provide User ID to delete!');
+  }
+
+  const isExistingUser = await findUserById(id);
+
+  if(!isExistingUser){
+      const error: any = new Error('User not found!');
+      error.code = 'USER_NOT_FOUND';
+      throw error;
+  }
+
+  const user= await deleteUserById(isExistingUser.id);
+  return user;
+}

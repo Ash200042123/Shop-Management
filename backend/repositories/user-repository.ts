@@ -7,7 +7,11 @@ export const findUser = async(email:string)=>{
 };
 
 export const findUserById = async(userId:number)=>{
-  return await prisma.user.findUnique({where: {id:userId},});
+  return await prisma.user.findUnique({where: {id:userId},select:{id: true,
+    email: true,
+    name: true,
+    role: true,
+    unitsSold: true,}});
 };
 
 
@@ -49,6 +53,24 @@ export const updatePasswordByUserId = async (userId: number, hashedPassword: str
     });
   };
 
+export const updateEmailByUserId = async (userId: number, email: string) => {
+  
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+  
+    if (!user) {
+      throw new Error('User not found');
+    }
+  
+    return await prisma.user.update({
+      where: { id: userId },
+      data: {
+         email,
+      },
+    });
+  };
+
 
 export const updateUserUnitsSold = async(email:string, newUnitsSold:number)=>{
     const user = await prisma.user.findUnique({where: {email},});
@@ -61,4 +83,12 @@ export const updateUserUnitsSold = async(email:string, newUnitsSold:number)=>{
             unitsSold: user.unitsSold+newUnitsSold
         }
     })
+};
+
+
+
+export const deleteUserById = async(id:number)=>{
+  return await prisma.user.delete({
+      where:{id}
+  });
 }

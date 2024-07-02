@@ -11,9 +11,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -33,8 +30,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import axios from "axios";
-import { ChangeEvent, useState } from "react";
-import { Link } from "react-router-dom";
+import { ChangeEvent, useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Home,
   LineChart,
@@ -46,21 +43,49 @@ import {
   Search,
 } from "lucide-react";
 
+export function EditEmployee() {
+  const { employeeId } = useParams();
+  const navigate = useNavigate();
 
-export function CreateProduct() {
-  const [formValues, setFormValues] = useState<{
-    name: string;
-    description: string;
-    price: number;
-    quantity: number;
-  }>({
+  const [formValues, setFormValues] = useState<{ email: string; name: string; role: string; unitsSold: number }>({
+    email: "",
     name: "",
-    description: "",
-    price: 0,
-    quantity: 0,
+    role: "",
+    unitsSold: 0,
   });
+  
+
 
   const [errors, setErrors] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchEmployee = async () => {
+      try {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  
+        if (!backendUrl) {
+          throw new Error("Backend URL is not defined");
+        }
+  
+        const response = await axios.get(`${backendUrl}/user/${employeeId}`);
+        const employee = response.data.user;
+  
+        setFormValues({
+          email: employee.email,
+          name: employee.name,
+        role: employee.role,
+        unitsSold: employee.unitsSold,
+        });
+
+
+      } catch (error) {
+        console.error("Error fetching employee:", error);
+      }
+    };
+  
+    fetchEmployee();
+  }, [employeeId]);
+  
 
   const handleFieldChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -68,8 +93,8 @@ export function CreateProduct() {
   };
 
   const handleSubmit = async () => {
-    if (formValues.price <= 0 || formValues.quantity <= 0) {
-      setErrors(["Price and Quantity must be greater than 0."]);
+    if (!formValues.email) {
+      setErrors(["Email must not be empty."]);
       return;
     }
 
@@ -80,18 +105,12 @@ export function CreateProduct() {
         throw new Error("Backend URL is not defined");
       }
 
-      const response = await axios.post(
-        `${backendUrl}/add-product`,
-        {
-            name: formValues.name,
-            description: formValues.description,
-            price: formValues.price,
-            stock: formValues.quantity
-        }
-      );
-      console.log(response);
+      const response = await axios.put(`${backendUrl}/user/${employeeId}`, {
+        email: formValues.email,
+      });
+      navigate(`/employees/${employeeId}`);
     } catch (error) {
-      console.error("Error creating product:", error);
+      console.error("Error updating employee:", error);
     }
   };
 
@@ -124,7 +143,7 @@ export function CreateProduct() {
               <TooltipTrigger asChild>
                 <Link
                   to="/invoices"
-                  className="fflex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <ShoppingCart className="h-5 w-5" />
                   <span className="sr-only">Invoices</span>
@@ -136,7 +155,7 @@ export function CreateProduct() {
               <TooltipTrigger asChild>
                 <Link
                   to="/products"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <Package className="h-5 w-5" />
                   <span className="sr-only">Products</span>
@@ -148,7 +167,7 @@ export function CreateProduct() {
               <TooltipTrigger asChild>
                 <Link
                   to="/employees"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <Users2 className="h-5 w-5" />
                   <span className="sr-only">Employees</span>
@@ -226,120 +245,104 @@ export function CreateProduct() {
                 </nav>
               </SheetContent>
             </Sheet>
-            <Breadcrumb className="hidden md:flex">
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink asChild>
-                    <Link to="/">Dashboard</Link>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Add Product</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-            <div className="relative ml-auto flex-1 md:grow-0">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search..."
-                className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
-              />
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="overflow-hidden rounded-full"
-                >
-                  <img
-                    src="/placeholder-user.jpg"
-                    width={36}
-                    height={36}
-                    alt="Avatar"
-                    className="overflow-hidden rounded-full"
+            <Breadcrumb className="hidden sm:block">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/employees">Employees</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>
+                  Edit Email
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+            <div className="ml-auto flex items-center gap-4">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="relative hover:bg-accent"
+                  >
+                    <Search className="h-4 w-4" />
+                    <span className="sr-only">Search</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64">
+                  <Input
+                    type="search"
+                    placeholder="Search products..."
+                    className="h-9"
                   />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Logout</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </header>
-          <main className="flex-1 space-y-4 p-4 pt-2 sm:p-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create Product</CardTitle>
-                <CardDescription>
-                  Fill out the form below to create a new product.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-6">
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Product Name</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      value={formValues.name}
-                      onChange={handleFieldChange}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Input
-                      id="description"
-                      name="description"
-                      value={formValues.description}
-                      onChange={(e) => handleFieldChange(e)}
-                    />
-                  </div>
-                </div>
+          <Card className="mt-2 w-full p-6 shadow-md sm:mt-0 sm:p-8">
+  <CardHeader className="space-y-1">
+    <CardTitle className="text-2xl">Edit Employee</CardTitle>
+    <CardDescription>
+      Modify the employee details below.
+    </CardDescription>
+  </CardHeader>
+  <CardContent className="grid gap-4">
+    <div className="grid gap-2">
+      <Label htmlFor="name">Name</Label>
+      <Input
+        id="name"
+        name="name"
+        value={formValues.name}
+        readOnly
+        placeholder="Employee name"
+      />
+    </div>
+    <div className="grid gap-2">
+      <Label htmlFor="role">Role</Label>
+      <Input
+        id="role"
+        name="role"
+        value={formValues.role}
+        readOnly
+        placeholder="Employee role"
+      />
+    </div>
+    <div className="grid gap-2">
+      <Label htmlFor="unitsSold">Units Sold</Label>
+      <Input
+        id="unitsSold"
+        name="unitsSold"
+        value={formValues.unitsSold}
+        readOnly
+        placeholder="Units sold by the employee"
+      />
+    </div>
+    <div className="grid gap-2">
+      <Label htmlFor="email">Email</Label>
+      <Input
+        id="email"
+        name="email"
+        value={formValues.email}
+        onChange={handleFieldChange}
+        placeholder="Enter employee email"
+      />
+    </div>
+    {errors.length > 0 && (
+      <div className="text-red-500">
+        {errors.map((error, index) => (
+          <div key={index}>{error}</div>
+        ))}
+      </div>
+    )}
+    <Button onClick={handleSubmit}>Save</Button>
+  </CardContent>
+</Card>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="price">Price</Label>
-                    <Input
-                      id="price"
-                      name="price"
-                      type="number"
-                      value={formValues.price.toString()}
-                      onChange={handleFieldChange}
-                      min="0"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="quantity">Quantity</Label>
-                    <Input
-                      id="quantity"
-                      name="quantity"
-                      type="number"
-                      value={formValues.quantity.toString()}
-                      onChange={handleFieldChange}
-                      min="0"
-                    />
-                  </div>
-                </div>
-                {errors.length > 0 && (
-                  <div className="text-red-500">
-                    {errors.map((error, index) => (
-                      <div key={index}>{error}</div>
-                    ))}
-                  </div>
-                )}
-                <Button
-                  onClick={handleSubmit}
-                  className="flex justify-center items-center w-1/2 mx-auto"
-                >
-                  Submit
-                </Button>
-              </CardContent>
-            </Card>
-          </main>
         </div>
       </TooltipProvider>
     </div>

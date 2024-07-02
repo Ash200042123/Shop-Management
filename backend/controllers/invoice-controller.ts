@@ -1,5 +1,34 @@
 import { Request, Response } from 'express';
-import { deleteInvoiceByOrderService, deleteInvoiceByUserService, getAllInvoicesService, getInvoiceByOrderService, getInvoiceByUserService } from '../services/invoice-service';
+import { deleteInvoiceByOrderService, deleteInvoiceByUserService, getAllInvoicesService, getInvoiceByInvoiceId, getInvoiceByOrderService, getInvoiceByUserService } from '../services/invoice-service';
+
+
+export async function getInvoiceByIdController(req: Request, res: Response) {
+    const { id } = req.params;
+  
+    try {
+      const invoiceId = parseInt(id, 10);
+      const invoice = await getInvoiceByInvoiceId(invoiceId);
+      
+      if (!invoice) {
+        return res.status(404).json({ message: 'Invoice not found' });
+      }
+  
+  
+      res.status(200).json({
+        id: invoice.id,
+        userId: invoice.userId,
+        customerName: invoice.order.customerName,
+        employeeName: invoice.order.user.name,
+        products: invoice.order.products,
+        invoiceDate: invoice.invoiceDate,
+        totalAmount: invoice.totalAmount,
+      });
+    } catch (error) {
+      console.error('Error fetching invoice:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+
 
 export const getInvoiceByOrderIdController = async(req:Request, res:Response)=>{
 

@@ -4,6 +4,7 @@ import './index.css'
 import {
   createBrowserRouter,
   RouterProvider,
+  Routes,
 } from "react-router-dom";
 import ErrorPage from './pages/error-page';
 import { Signup } from './pages/Signup';
@@ -15,6 +16,10 @@ import { Products } from './pages/Products';
 import { CreateProduct } from './pages/create-product';
 import { EditProduct } from './pages/edit-product';
 import { Employees } from './pages/employees';
+import { EditEmployee } from './pages/edit-employee';
+import { Invoices } from './pages/invoices';
+import { ViewInvoice } from './pages/view-invoice';
+
 
 const router = createBrowserRouter([
   {
@@ -31,7 +36,7 @@ const router = createBrowserRouter([
     element: <Login />,
   },
   {
-    path: "/orders/:orderId",
+    path: '/orders/:orderId',
     element: <OrderDetailsPage />,
   },
   {
@@ -54,11 +59,27 @@ const router = createBrowserRouter([
     path: "/employees",
     element: <Employees />,
   },
+  {
+    path: "/employees/:employeeId",
+    element: <EditEmployee />,
+  },
+  {
+    path: "/invoices",
+    element: <Invoices />,
+  },
+  {
+    path: "/invoices/:invoiceId",
+    element: <ViewInvoice />,
+  },
 ]);
 
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
+  
   <React.StrictMode>
+  
     <RouterProvider router={router} />
+    
   </React.StrictMode>,
+  
 )
