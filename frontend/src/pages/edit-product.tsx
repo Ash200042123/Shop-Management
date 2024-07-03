@@ -9,6 +9,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getCookie } from "@/utils/cookie-utils";
 
 import axios from "axios";
 import { ChangeEvent, useEffect, useState } from "react";
@@ -18,6 +19,7 @@ import {  useNavigate, useParams } from "react-router-dom";
 export function EditProduct() {
   const { productName } = useParams();
   const navigate = useNavigate();
+  const token = getCookie();
 
   const [formValues, setFormValues] = useState<{
     name: string;
@@ -43,7 +45,12 @@ export function EditProduct() {
         }
 
         const response = await axios.get(
-          `${backendUrl}/products/${productName}`
+          `${backendUrl}/products/${productName}`,{
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
         );
         const product = response.data.product;
 
@@ -88,6 +95,11 @@ export function EditProduct() {
           description: formValues.description,
           price: formValues.price,
           stock: formValues.quantity,
+        },{
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
       );
       // console.log(response);

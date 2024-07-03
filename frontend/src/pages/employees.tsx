@@ -28,9 +28,13 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { getCookie } from "@/utils/cookie-utils";
 
 export function Employees() {
   const [employees, setEmployees] = useState<User[]>([]);
+  const [accessDenied, setAccessDenied] = useState<boolean>(false);
+  const token = getCookie();
+
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -41,7 +45,12 @@ export function Employees() {
           throw new Error("Backend URL is not defined");
         }
 
-        const response = await axios.get(`${backendUrl}/employees`);
+        const response = await axios.get(`${backendUrl}/employees`,{
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         const fetchedEmployees = response.data.users.map((employee: any) => ({
           id: employee.id,
           email: employee.email,
@@ -51,7 +60,10 @@ export function Employees() {
         }));
         setEmployees(fetchedEmployees);
       } catch (error) {
-        console.error("Error fetching orders:", error);
+        if (axios.isAxiosError(error) && error.response?.status === 403) {
+          setAccessDenied(true);
+        } 
+        console.error("Error fetching employees:", error);
       }
     };
 
@@ -72,6 +84,20 @@ export function Employees() {
     }
   };
 
+
+  if (accessDenied) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="p-4 border border-red-400 rounded-lg bg-red-100">
+          <h1 className="text-xl font-semibold text-red-600">
+            You don't have access to this page
+          </h1>
+        </div>
+      </div>
+    );
+  }
+
+  
   return (
     <Tabs defaultValue="all">
       <div className="flex items-center">

@@ -43,11 +43,13 @@ import {  useParams } from "react-router-dom";
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { getCookie } from "@/utils/cookie-utils";
 
 export function OrderDetailsPage() {
   const [order, setOrder] = useState<Order>();
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const { orderId } = useParams();
+  const token= getCookie();
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -57,7 +59,12 @@ export function OrderDetailsPage() {
         if (!backendUrl) {
           throw new Error("Backend URL is not defined");
         }
-        const response = await axios.get(`${backendUrl}/orders/${orderId}`);
+        const response = await axios.get(`${backendUrl}/orders/${orderId}`,{
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
 
         setOrder(response.data.order);
         setSelectedStatus(response.data.order.status);
@@ -85,6 +92,11 @@ export function OrderDetailsPage() {
       const response = await axios.put(`${backendUrl}/orders`, {
         orderId,
         status: selectedStatus,
+      },{
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       console.log(response);
     } catch (error) {

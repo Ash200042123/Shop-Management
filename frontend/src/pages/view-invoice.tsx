@@ -6,10 +6,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import {  useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { getCookie } from "@/utils/cookie-utils";
 
 interface Product {
   productId: number;
@@ -21,14 +22,15 @@ interface Invoice {
   userId: number;
   customerName: string;
   employeeName: string;
-  products: Product[]; // Updated to use Product interface
+  products: Product[]; 
   invoiceDate: string;
   totalAmount: number;
 }
 
 export function ViewInvoice() {
   const { invoiceId } = useParams();
-  const [invoice, setInvoice] = useState<Invoice | null>(null); // Updated to use Invoice interface
+  const [invoice, setInvoice] = useState<Invoice | null>(null);
+  const token = getCookie(); 
 
   useEffect(() => {
     const fetchInvoice = async () => {
@@ -40,7 +42,12 @@ export function ViewInvoice() {
         }
 
         const response = await axios.get<Invoice>(
-          `${backendUrl}/invoices/${invoiceId}`
+          `${backendUrl}/invoices/${invoiceId}`,{
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
         );
         setInvoice(response.data);
       } catch (error) {
@@ -60,66 +67,64 @@ export function ViewInvoice() {
 
   return (
     <div className="sm:py-8 sm:px-8">
-            <Card className="w-full p-6 shadow-md">
-              <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl">View Invoice</CardTitle>
-                <CardDescription>
-                  View detailed information about the invoice.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4">
-                <div className="grid gap-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    Invoice ID
-                  </label>
-                  <span className="text-lg font-semibold">{invoice.id}</span>
-                </div>
-                <div className="grid gap-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    Customer Name
-                  </label>
-                  <span className="text-lg font-semibold">
-                    {invoice.customerName}
-                  </span>
-                </div>
-                <div className="grid gap-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    Employee Name
-                  </label>
-                  <span className="text-lg font-semibold">
-                    {invoice.employeeName}
-                  </span>
-                </div>
-                <div className="grid gap-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    Products
-                  </label>
-                  <ul className="list-disc list-inside">
-                    {products.map((product: Product) => (
-                      <li
-                        key={product.productId}
-                      >{`Product ID: ${product.productId}, Quantity: ${product.quantity}`}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="grid gap-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    Invoice Date
-                  </label>
-                  <span className="text-lg font-semibold">
-                    {new Date(invoice.invoiceDate).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="grid gap-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    Total Amount
-                  </label>
-                  <span className="text-lg font-semibold">
-                    {invoice.totalAmount}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+      <Card className="w-full p-6 shadow-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl">View Invoice</CardTitle>
+          <CardDescription>
+            View detailed information about the invoice.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="grid gap-2">
+            <label className="text-sm font-medium text-gray-700">
+              Invoice ID
+            </label>
+            <span className="text-lg font-semibold">{invoice.id}</span>
           </div>
+          <div className="grid gap-2">
+            <label className="text-sm font-medium text-gray-700">
+              Customer Name
+            </label>
+            <span className="text-lg font-semibold">
+              {invoice.customerName}
+            </span>
+          </div>
+          <div className="grid gap-2">
+            <label className="text-sm font-medium text-gray-700">
+              Employee Name
+            </label>
+            <span className="text-lg font-semibold">
+              {invoice.employeeName}
+            </span>
+          </div>
+          <div className="grid gap-2">
+            <label className="text-sm font-medium text-gray-700">
+              Products
+            </label>
+            <ul className="list-disc list-inside">
+              {products.map((product: Product) => (
+                <li
+                  key={product.productId}
+                >{`Product ID: ${product.productId}, Quantity: ${product.quantity}`}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="grid gap-2">
+            <label className="text-sm font-medium text-gray-700">
+              Invoice Date
+            </label>
+            <span className="text-lg font-semibold">
+              {new Date(invoice.invoiceDate).toLocaleDateString()}
+            </span>
+          </div>
+          <div className="grid gap-2">
+            <label className="text-sm font-medium text-gray-700">
+              Total Amount
+            </label>
+            <span className="text-lg font-semibold">{invoice.totalAmount}</span>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

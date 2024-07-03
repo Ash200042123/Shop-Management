@@ -10,6 +10,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getCookie } from "@/utils/cookie-utils";
 
 import axios from "axios";
 import { ChangeEvent, useEffect, useState } from "react";
@@ -19,6 +20,7 @@ import {  useNavigate, useParams } from "react-router-dom";
 export function EditEmployee() {
   const { employeeId } = useParams();
   const navigate = useNavigate();
+  const token = getCookie();
 
   const [formValues, setFormValues] = useState<{
     email: string;
@@ -43,7 +45,12 @@ export function EditEmployee() {
           throw new Error("Backend URL is not defined");
         }
 
-        const response = await axios.get(`${backendUrl}/user/${employeeId}`);
+        const response = await axios.get(`${backendUrl}/user/${employeeId}`,{
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         const employee = response.data.user;
 
         setFormValues({
@@ -80,6 +87,11 @@ export function EditEmployee() {
 
       const response = await axios.put(`${backendUrl}/user/${employeeId}`, {
         email: formValues.email,
+      },{
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       navigate(`/employees/${employeeId}`);
     } catch (error) {

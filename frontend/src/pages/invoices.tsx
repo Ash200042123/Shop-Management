@@ -31,9 +31,11 @@ import {
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { getCookie } from "@/utils/cookie-utils";
 
 export function Invoices() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const token = getCookie();
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -44,7 +46,12 @@ export function Invoices() {
           throw new Error("Backend URL is not defined");
         }
 
-        const response = await axios.get(`${backendUrl}/invoices`);
+        const response = await axios.get(`${backendUrl}/invoices`,{
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         const fetchedInvoices = response.data.invoices.map((invoice: any) => ({
           id: invoice.id,
           userId: invoice.userId,
@@ -69,7 +76,12 @@ export function Invoices() {
         throw new Error("Backend URL is not defined");
       }
 
-      await axios.delete(`${backendUrl}/invoices/${id}`);
+      await axios.delete(`${backendUrl}/invoices/${id}`,{
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       setInvoices(invoices.filter((invoice) => invoice.id !== id));
     } catch (error) {
       console.log(error);

@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 
 import axios from "axios";
 import { ChangeEvent, useEffect, useState } from "react";
+import { getCookie } from "@/utils/cookie-utils";
 
 
 export function CreateOrder() {
@@ -33,7 +34,7 @@ export function CreateOrder() {
     customerName: "",
     products: [{ productId: 0, quantity: 0, added: false }],
   });
-
+  const token = getCookie();
   const [errors, setErrors] = useState<string[]>([]);
   const [products, setProducts] = useState<{ id: number; name: string }[]>([]);
 
@@ -44,7 +45,12 @@ export function CreateOrder() {
         if (!backendUrl) {
           throw new Error("Backend URL is not defined");
         }
-        const response = await axios.get(`${backendUrl}/products`);
+        const response = await axios.get(`${backendUrl}/products`,{
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         setProducts(response.data.products);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -114,7 +120,13 @@ export function CreateOrder() {
 
       const response = await axios.post(
         `${backendUrl}/create-order`,
-        submitValues
+        submitValues,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
       );
       console.log(response);
     } catch (error) {

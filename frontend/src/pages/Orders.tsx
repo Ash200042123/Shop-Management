@@ -44,9 +44,6 @@ export function Homepage() {
   const navigate = useNavigate();
 
   const token = getCookie();
-  if(!token){
-    <Navigate to="/login" replace />
-  }
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -57,7 +54,12 @@ export function Homepage() {
           throw new Error("Backend URL is not defined");
         }
 
-        const response = await axios.get(`${backendUrl}/orders`); 
+        const response = await axios.get(`${backendUrl}/orders`,{
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }); 
         const fetchedOrders = response.data.orders.orders.map((order: any) => ({
           id: order.id,
           customerName: order.customerName,

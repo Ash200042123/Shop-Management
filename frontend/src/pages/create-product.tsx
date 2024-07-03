@@ -10,6 +10,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getCookie } from "@/utils/cookie-utils";
 
 import axios from "axios";
 import { ChangeEvent, useState } from "react";
@@ -27,7 +28,7 @@ export function CreateProduct() {
     price: 0,
     quantity: 0,
   });
-
+  const token = getCookie();
   const [errors, setErrors] = useState<string[]>([]);
 
   const handleFieldChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -53,6 +54,11 @@ export function CreateProduct() {
         description: formValues.description,
         price: formValues.price,
         stock: formValues.quantity,
+      },{
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       console.log(response);
     } catch (error) {

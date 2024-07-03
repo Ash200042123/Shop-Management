@@ -35,10 +35,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { getCookie } from "@/utils/cookie-utils";
 
 export function Products() {
   const [products, setProducts] = useState<Product[]>([]);
-  const navigate = useNavigate();
+  const token= getCookie();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -49,7 +50,12 @@ export function Products() {
           throw new Error("Backend URL is not defined");
         }
 
-        const response = await axios.get(`${backendUrl}/products`);
+        const response = await axios.get(`${backendUrl}/products`,{
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         const fetchedProducts = response.data.products.map((product: any) => ({
           id: product.id,
           productName: product.name,
@@ -76,7 +82,12 @@ export function Products() {
         throw new Error("Backend URL is not defined");
       }
 
-      const response = await axios.delete(`${backendUrl}/products/${name}`);
+      const response = await axios.delete(`${backendUrl}/products/${name}`,{
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
     } catch (error) {
       console.log(error);
     }
