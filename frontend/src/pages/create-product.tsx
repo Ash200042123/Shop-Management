@@ -14,6 +14,7 @@ import { getCookie } from "@/utils/cookie-utils";
 
 import axios from "axios";
 import { ChangeEvent, useState } from "react";
+import { toast } from "sonner";
 
 
 export function CreateProduct() {
@@ -60,8 +61,9 @@ export function CreateProduct() {
           'Content-Type': 'application/json'
         }
       });
-      console.log(response);
+      toast.success("Product Created Successfully!");
     } catch (error) {
+      toast.error("Could not create product!");
       console.error("Error creating product:", error);
     }
   };

@@ -14,6 +14,7 @@ import { getCookie } from "@/utils/cookie-utils";
 import axios from "axios";
 import { ChangeEvent, useEffect, useState } from "react";
 import {  useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 
 
 export function EditProduct() {
@@ -103,8 +104,10 @@ export function EditProduct() {
         }
       );
       // console.log(response);
+      toast.success("Successfully Updated Product!");
       navigate(`/products/${formValues.name}`);
     } catch (error) {
+      toast.error("Could not update product!");
       console.error("Error creating product:", error);
     }
   };

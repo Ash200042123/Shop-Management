@@ -18,6 +18,7 @@ import { ViewInvoice } from "./pages/view-invoice";
 import { DashboardLayout } from "./layouts/dashboard-layout";
 import AuthLayout from "./layouts/auth-layout";
 import { Sales } from "./pages/sales";
+import { Toaster } from "./components/ui/sonner";
 
 const router = createBrowserRouter([
   {
@@ -92,6 +93,7 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
+    <Toaster />
     <RouterProvider router={router} />
   </React.StrictMode>
 );

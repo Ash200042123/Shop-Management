@@ -15,6 +15,7 @@ import { getCookie } from "@/utils/cookie-utils";
 import axios from "axios";
 import { ChangeEvent, useEffect, useState } from "react";
 import {  useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 
 
 export function EditEmployee() {
@@ -93,8 +94,10 @@ export function EditEmployee() {
           'Content-Type': 'application/json'
         }
       });
+      toast.success("Successfully Updated Employee!");
       navigate(`/employees/${employeeId}`);
     } catch (error) {
+      toast.error("Could not update employee!");
       console.error("Error updating employee:", error);
     }
   };

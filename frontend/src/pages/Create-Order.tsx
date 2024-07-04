@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import axios from "axios";
 import { ChangeEvent, useEffect, useState } from "react";
 import { getCookie } from "@/utils/cookie-utils";
+import { toast } from "sonner";
 
 
 export function CreateOrder() {
@@ -128,8 +129,9 @@ export function CreateOrder() {
           }
         }
       );
-      console.log(response);
+      toast.success("Order Created Successfully!");
     } catch (error) {
+      toast.error("Error Creating Product!");
       console.log(error);
     }
   };

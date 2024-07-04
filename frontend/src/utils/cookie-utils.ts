@@ -5,7 +5,8 @@ import Cookies from 'js-cookie';
 const COOKIE_NAME = 'jwt';
 
 export const setCookie = (token: string) => {
-  Cookies.set(COOKIE_NAME, token, { expires: 1 }); 
+  const expiryDate = new Date(new Date().getTime() + 3600 * 1000);
+  Cookies.set(COOKIE_NAME, token, { expires: expiryDate }); 
 };
 
 export const getCookie = (): string | undefined => {

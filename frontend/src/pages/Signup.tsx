@@ -19,12 +19,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChangeEvent, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 
 
 export function Signup() {
 
+  const navigate = useNavigate();
   const [formValues, setFormValues] = useState({
     fullName: "",
     role: "Employee",
@@ -49,14 +51,14 @@ export function Signup() {
 
   const handleSubmit = async () => {
     try {
-    //   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+      const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-    //   if (!backendUrl) {
-    //     throw new Error("Backend URL is not defined");
-    //   }
+      if (!backendUrl) {
+        throw new Error("Backend URL is not defined");
+      }
       const response = await axios.post(
         // backendUrl+ "/signup", 
-        "http://localhost:3000/api/signup",
+        `${backendUrl}/signup`,
         {
         name: formValues.fullName,
         email: formValues.email,
@@ -64,8 +66,10 @@ export function Signup() {
         role: formValues.role,
       });
 
-      console.log(response);
+      toast.success("Sign Up successful!");
+      navigate("/auth/signup")
     } catch (error) {
+      toast.error("Could not Sign up!");
       console.log(error);
     }
   };
@@ -143,7 +147,7 @@ export function Signup() {
           </div>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
-            <Link to="/login" className="underline">
+            <Link to="/auth/login" className="underline">
               Sign in
             </Link>
           </div>

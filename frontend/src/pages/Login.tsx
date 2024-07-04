@@ -12,6 +12,7 @@ import { setCookie } from "@/utils/cookie-utils";
 import axios from "axios";
 import { ChangeEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export function Login() {
   const [formValues, setFormValues] = useState({
@@ -42,8 +43,10 @@ export function Login() {
         }
       );
       setCookie(response.data.token);
+      toast.success("Successfully Logged In!");
       navigate("/");
     } catch (error) {
+      toast.error("Could not Log In!");
       console.log(error);
     }
   };
@@ -96,7 +99,7 @@ export function Login() {
           </div>
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{" "}
-            <Link to="/signup" className="underline">
+            <Link to="/auth/signup" className="underline">
               Sign up
             </Link>
           </div>
