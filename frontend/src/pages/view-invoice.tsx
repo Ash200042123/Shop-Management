@@ -9,8 +9,12 @@ import {
 import { useParams } from "react-router-dom";
 
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getCookie } from "@/utils/cookie-utils";
+import ReactToPrint from "react-to-print";
+import { Button } from "@/components/ui/button";
+import { File } from "lucide-react";
+import { toast } from "sonner";
 
 interface Product {
   productId: number;
@@ -31,6 +35,7 @@ export function ViewInvoice() {
   const { invoiceId } = useParams();
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const token = getCookie(); 
+  const componentRef = useRef(null);
 
   useEffect(() => {
     const fetchInvoice = async () => {
@@ -66,7 +71,26 @@ export function ViewInvoice() {
   const products = JSON.parse(invoice.products);
 
   return (
-    <div className="sm:py-8 sm:px-8">
+    <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
+      <div className="ml-auto flex items-center gap-2">
+        <ReactToPrint
+          trigger={() => {
+            return (
+              <Button size="sm" variant="outline" className="h-7 gap-1 text-sm">
+                <File className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only">Export</span>
+              </Button>
+            );
+          }}
+          content={() => componentRef.current}
+          documentTitle="All Invoices"
+          pageStyle="print"
+          onAfterPrint={() => {
+            toast.success("Invoices printed!");
+          }}
+        />
+      </div>
+    <div className="sm:py-8 sm:px-8" ref={componentRef}>
       <Card className="w-full p-6 shadow-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl">View Invoice</CardTitle>
@@ -125,6 +149,7 @@ export function ViewInvoice() {
           </div>
         </CardContent>
       </Card>
+    </div>
     </div>
   );
 }

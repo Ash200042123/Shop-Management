@@ -105,14 +105,15 @@ export const updatePasswordController = async (req: Request, res: Response) => {
 
 
 export const updateUnitSoldsByUserController = async(req:Request, res:Response)=>{
-    const {email, newUnitsSold} = req.body;
+    const {userId, newUnitsSold} = req.body;
 
     try {
-        if(!email || !newUnitsSold ){
-            return res.status(400).json({error: 'Please provide email and units!'});
+        if(!userId || !newUnitsSold ){
+            return res.status(400).json({error: 'Please provide User ID and units!'});
         }
+        const userIdInt = parseInt(userId);
 
-        const user = await updateUnitSoldsByUserService(email,newUnitsSold);
+        const user = await updateUnitSoldsByUserService(userIdInt,newUnitsSold);
         return res.status(200).json({user});
     } catch (error) {
         console.error('Error occured:',error);

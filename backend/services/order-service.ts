@@ -1,10 +1,10 @@
 import { Status } from "@prisma/client";
 import { createInvoice } from "../repositories/invoice-repository";
 import { createOrder, deleteOrderById, deleteOrderByUser, getAllOrders, getOrdersByOrderId, getOrdersByUserId, updateOrderStatus, updateOrderWithInvoiceId } from "../repositories/order-repository";
-import { findProductById } from "../repositories/product-repository";
+import { decreaseProductQuantity, findProductById, getProductQuantity } from "../repositories/product-repository";
 import { deleteInvoiceByOrderService } from "./invoice-service";
 import { getProductById } from "./product-service";
-import { findUserById } from "../repositories/user-repository";
+import { findUserById, updateUserUnitsSold } from "../repositories/user-repository";
 import { createSale } from "../repositories/sale-repository";
 
 const calculateOrderTotal = async(products:{productId:number; quantity:number}[])=>{
@@ -22,14 +22,23 @@ const calculateOrderTotal = async(products:{productId:number; quantity:number}[]
 
 
 export const createOrderService = async(userId:number,customerName:string,products:{productId:number; quantity:number}[])=>{
-    const newOrder = await createOrder(userId,customerName,products);
+    
 
     for (const product of products) {
+        const stock =await getProductQuantity(product.productId);
+        if(product.quantity>stock){
+            throw new Error("Product Quantity exceeds stock!");
+        }
         await createSale(userId, product.productId, product.quantity);
+        await decreaseProductQuantity(product.productId, product.quantity);
     }
+    const newOrder = await createOrder(userId,customerName,products);
 
     const totalOrderAmount = await calculateOrderTotal(products);
     const newInvoice = await createInvoice(newOrder.id, userId, totalOrderAmount);
+
+    const totalQuantities = products.reduce((total, product) => total + product.quantity, 0);
+    await updateUserUnitsSold(userId, totalQuantities);
 
     const order = await updateOrderWithInvoiceId(newOrder.id, newInvoice.id);
     return {order, invoice:newInvoice};

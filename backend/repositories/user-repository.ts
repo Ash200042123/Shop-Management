@@ -72,13 +72,13 @@ export const updateEmailByUserId = async (userId: number, email: string) => {
   };
 
 
-export const updateUserUnitsSold = async(email:string, newUnitsSold:number)=>{
-    const user = await prisma.user.findUnique({where: {email},});
+export const updateUserUnitsSold = async(userId:number, newUnitsSold:number)=>{
+    const user = await prisma.user.findUnique({where: {id:userId},});
     if(!user){
         throw new Error('User not found');
     }
     return await prisma.user.update({
-        where:{email:email},
+        where:{id:userId},
         data:{
             unitsSold: user.unitsSold+newUnitsSold
         }

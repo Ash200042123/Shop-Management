@@ -80,7 +80,7 @@ export function Employees() {
         throw new Error("Backend URL is not defined");
       }
 
-      const response = await axios.delete(`${backendUrl}/employees/${id}`);
+       await axios.delete(`${backendUrl}/employees/${id}`);
     } catch (error) {
       console.log(error);
     }

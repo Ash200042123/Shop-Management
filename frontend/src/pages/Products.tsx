@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { getCookie } from "@/utils/cookie-utils";
@@ -78,7 +78,7 @@ export function Products() {
         throw new Error("Backend URL is not defined");
       }
 
-      const response = await axios.delete(`${backendUrl}/products/${name}`, {
+       await axios.delete(`${backendUrl}/products/${name}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -168,9 +168,7 @@ export function Products() {
                   <TableHead>Name</TableHead>
                   <TableHead className="hidden md:table-cell">Price</TableHead>
                   <TableHead className="hidden md:table-cell">Stock</TableHead>
-                  <TableHead className="hidden md:table-cell">
-                    Total Sales
-                  </TableHead>
+                  
 
                   <TableHead>
                     <span className="sr-only">Actions</span>
@@ -199,9 +197,7 @@ export function Products() {
                     <TableCell className="hidden md:table-cell">
                       {product.quantity}
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      SALES
-                    </TableCell>
+                    
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

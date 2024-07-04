@@ -9,6 +9,16 @@ export const findProduct = async(name:string)=>{
 
 export const findProductById = async(productId:number)=>{
     return await prisma.product.findUnique({where:{id:productId},});
+};
+
+
+export const getProductQuantity = async(productId:number)=>{
+    const product = await prisma.product.findUnique({where:{id:productId},select:{stock:true} });
+    if (!product) {
+        throw new Error('Product not found');
+    }
+
+    return product.stock;
 }
 
 
@@ -43,6 +53,19 @@ export const updateProductByName = async(name:string,updatedName?:string, update
     });
 }
 
+
+export const decreaseProductQuantity = async(productId:number, quantityOrdered:number)=>{
+    const product = await prisma.product.findUnique({where: {id:productId},});
+    if(!product){
+        throw new Error('Product not found');
+    }
+    return await prisma.product.update({
+        where:{id:productId},
+        data:{
+            stock: product.stock-quantityOrdered
+        }
+    });
+}
 
 export const deleteProductByName = async(name:string)=>{
     return await prisma.product.delete({

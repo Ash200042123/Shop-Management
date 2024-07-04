@@ -3,8 +3,6 @@ import {
   Truck,
   MoreVertical,
   CreditCard,
-  ChevronRight,
-  ChevronLeft,
   LoaderCircle
 } from "lucide-react";
 
@@ -13,7 +11,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -25,11 +22,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@/components/ui/pagination";
 import { Separator } from "@/components/ui/separator";
 import {
   Select,

@@ -91,8 +91,8 @@ export const updatePassword = async (userId: number, newPassword: string) => {
   };
 
 
-export const updateUnitSoldsByUserService = async (email:string, newUnitsSold:number)=>{
-    const user = updateUserUnitsSold(email, newUnitsSold);
+export const updateUnitSoldsByUserService = async (userId:number, newUnitsSold:number)=>{
+    const user = updateUserUnitsSold(userId, newUnitsSold);
     return user;
 };
 
