@@ -4,7 +4,8 @@ import {
   MoreVertical,
   CreditCard,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  LoaderCircle
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,7 @@ export function OrderDetailsPage() {
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const { orderId } = useParams();
   const token= getCookie();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -82,6 +84,7 @@ export function OrderDetailsPage() {
   }
 
   const handleSubmit = async () => {
+    setLoading(true);
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -101,6 +104,8 @@ export function OrderDetailsPage() {
       console.log(response);
     } catch (error) {
       console.error("Error updating order:", error);
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -232,14 +237,15 @@ export function OrderDetailsPage() {
               </dd>
             </div>
             <div className="flex items-center justify-center">
-              <Button type="submit" className="w-[70%]" onClick={handleSubmit}>
-                Update
+              <Button type="submit" className="w-[70%]" onClick={handleSubmit} disabled={loading}>
+              {loading && <LoaderCircle className="animate-spin" />}
+              {!loading && <div>Update</div>}
               </Button>
             </div>
           </dl>
         </div>
       </CardContent>
-      <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
+      {/* <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
         <div className="text-xs text-muted-foreground">
           Updated <time dateTime="2023-11-23">November 23, 2023</time>
         </div>
@@ -259,7 +265,7 @@ export function OrderDetailsPage() {
             </PaginationItem>
           </PaginationContent>
         </Pagination>
-      </CardFooter>
+      </CardFooter> */}
     </Card>
   );
 }

@@ -21,12 +21,15 @@ import { ChangeEvent, useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { LoaderCircle } from "lucide-react";
 
 
 
 export function Signup() {
 
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
   const [formValues, setFormValues] = useState({
     fullName: "",
     role: "Employee",
@@ -50,6 +53,7 @@ export function Signup() {
   };
 
   const handleSubmit = async () => {
+    setLoading(true);
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -71,6 +75,8 @@ export function Signup() {
     } catch (error) {
       toast.error("Could not Sign up!");
       console.log(error);
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -138,8 +144,10 @@ export function Signup() {
                 onChange={handleFieldChange}
               />
             </div>
-            <Button type="submit" className="w-full" onClick={handleSubmit}>
-              Create an account
+            <Button type="submit" className="w-full" onClick={handleSubmit} disabled={loading}>
+            {loading && <LoaderCircle className="animate-spin" />}
+            {!loading && <div>Create an account</div>}
+              
             </Button>
             {/* <Button variant="outline" className="w-full">
             Sign up with GitHub

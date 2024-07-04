@@ -13,11 +13,13 @@ import { Label } from "@/components/ui/label";
 import { getCookie } from "@/utils/cookie-utils";
 
 import axios from "axios";
+import { LoaderCircle } from "lucide-react";
 import { ChangeEvent, useState } from "react";
 import { toast } from "sonner";
 
 
 export function CreateProduct() {
+  const [loading, setLoading] = useState(false);
   const [formValues, setFormValues] = useState<{
     name: string;
     description: string;
@@ -38,11 +40,12 @@ export function CreateProduct() {
   };
 
   const handleSubmit = async () => {
+    
     if (formValues.price <= 0 || formValues.quantity <= 0) {
       setErrors(["Price and Quantity must be greater than 0."]);
       return;
     }
-
+    setLoading(true);
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -65,6 +68,8 @@ export function CreateProduct() {
     } catch (error) {
       toast.error("Could not create product!");
       console.error("Error creating product:", error);
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -132,8 +137,10 @@ export function CreateProduct() {
         <Button
           onClick={handleSubmit}
           className="flex justify-center items-center w-1/2 mx-auto"
+          disabled={loading}
         >
-          Submit
+          {loading && <LoaderCircle className="animate-spin" />}
+          {!loading && <div>Submit</div>}
         </Button>
       </CardContent>
     </Card>

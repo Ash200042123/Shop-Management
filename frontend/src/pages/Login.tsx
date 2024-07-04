@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { setCookie } from "@/utils/cookie-utils";
 import axios from "axios";
+import { LoaderCircle } from "lucide-react";
 import { ChangeEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -21,6 +22,7 @@ export function Login() {
   });
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(false);
   const handleFieldChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
@@ -28,6 +30,7 @@ export function Login() {
   };
 
   const handleSubmit = async () => {
+    setLoading(true);
     try {
         const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -48,6 +51,8 @@ export function Login() {
     } catch (error) {
       toast.error("Could not Log In!");
       console.log(error);
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -93,8 +98,9 @@ export function Login() {
                 name="password"
               />
             </div>
-            <Button type="submit" className="w-full" onClick={handleSubmit}>
-              Login
+            <Button type="submit" className="w-full" onClick={handleSubmit} disabled={loading}>
+              {loading && <LoaderCircle className="animate-spin" />}
+              {!loading && <div>Login</div>}
             </Button>
           </div>
           <div className="mt-4 text-center text-sm">

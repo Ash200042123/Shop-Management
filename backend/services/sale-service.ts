@@ -1,4 +1,21 @@
-import { createSale, deleteSaleById, getAllSales, getSalesByProductId, getSalesByUserId, getSalesProductWise, updateSaleById } from "../repositories/sale-repository";
+import { createSale, deleteSaleById, findSalesForPastMonth, findSalesForPastWeek, getAllSales, getSalesByProductId, getSalesByUserId, getSalesProductWise, updateSaleById } from "../repositories/sale-repository";
+
+
+export const getTotalSalesForPastWeek = async () => {
+    const sales = await findSalesForPastWeek();
+  
+    return sales.reduce((total, sale) => {
+      return total + sale.quantity * sale.product.price;
+    }, 0);
+  };
+  
+  export const getTotalSalesForPastMonth = async () => {
+    const sales = await findSalesForPastMonth();
+  
+    return sales.reduce((total, sale) => {
+      return total + sale.quantity * sale.product.price;
+    }, 0);
+  };
 
 
 export const createSaleService = async (userId: number, productId: number, quantity: number) => {

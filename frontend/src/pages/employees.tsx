@@ -26,15 +26,17 @@ import {
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { getCookie } from "@/utils/cookie-utils";
+import ReactToPrint from "react-to-print";
+import { toast } from "sonner";
 
 export function Employees() {
   const [employees, setEmployees] = useState<User[]>([]);
   const [accessDenied, setAccessDenied] = useState<boolean>(false);
   const token = getCookie();
-
+  const componentRef = useRef(null);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -131,12 +133,22 @@ export function Employees() {
                       </DropdownMenuCheckboxItem>
                     </DropdownMenuContent>
                   </DropdownMenu> */}
-          <Button size="sm" variant="outline" className="h-8 gap-1">
-            <File className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-              Export
-            </span>
-          </Button>
+          <ReactToPrint
+              trigger={() => {
+                return <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 gap-1 text-sm"
+                >
+                  <File className="h-3.5 w-3.5" />
+                  <span className="sr-only sm:not-sr-only">Export</span>
+                </Button>;
+              }}
+              content={()=>componentRef.current}
+              documentTitle="All Employees"
+              pageStyle="print"
+              onAfterPrint={()=>{toast.success("Employees List printed!")}}
+            />
           <Link to="/employees/add">
             <Button size="sm" className="h-8 gap-1">
               <PlusCircle className="h-3.5 w-3.5" />
@@ -148,7 +160,7 @@ export function Employees() {
         </div>
       </div>
       <TabsContent value="all">
-        <Card x-chunk="dashboard-06-chunk-0">
+        <Card x-chunk="dashboard-06-chunk-0" ref={componentRef}>
           <CardHeader>
             <CardTitle>Employees</CardTitle>
             <CardDescription>

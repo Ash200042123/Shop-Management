@@ -1,23 +1,14 @@
-import { File, ListFilter } from "lucide-react";
+import { File } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Progress } from "@/components/ui/progress";
+
 import {
   Table,
   TableBody,
@@ -28,14 +19,17 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { getCookie } from "@/utils/cookie-utils";
+import ReactToPrint from "react-to-print";
+import { toast } from "sonner";
 
 export function Sales() {
   const [sales, setSales] = useState<Sale[]>([]);
   const [salesSummary, setSalesSummary] = useState<SalesSummary[]>([]);
   const token = getCookie();
+  const componentRef = useRef(null);
 
   useEffect(() => {
     const fetchSales = async () => {
@@ -120,14 +114,26 @@ export function Sales() {
           </TabsList>
           <div className="ml-auto flex items-center gap-2">
             
-            <Button size="sm" variant="outline" className="h-7 gap-1 text-sm">
-              <File className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only">Export</span>
-            </Button>
+          <ReactToPrint
+              trigger={() => {
+                return <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 gap-1 text-sm"
+                >
+                  <File className="h-3.5 w-3.5" />
+                  <span className="sr-only sm:not-sr-only">Export</span>
+                </Button>;
+              }}
+              content={()=>componentRef.current}
+              documentTitle="All Orders"
+              pageStyle="print"
+              onAfterPrint={()=>{toast.success("PDF printed")}}
+            />
           </div>
         </div>
         <TabsContent value="products">
-          <Card>
+          <Card ref={componentRef}>
             <CardHeader>
               <CardTitle>Sales by Products</CardTitle>
               <CardDescription>

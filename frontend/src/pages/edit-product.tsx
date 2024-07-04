@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { getCookie } from "@/utils/cookie-utils";
 
 import axios from "axios";
+import { LoaderCircle } from "lucide-react";
 import { ChangeEvent, useEffect, useState } from "react";
 import {  useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -21,6 +22,7 @@ export function EditProduct() {
   const { productName } = useParams();
   const navigate = useNavigate();
   const token = getCookie();
+  const [loading, setLoading] = useState(false);
 
   const [formValues, setFormValues] = useState<{
     name: string;
@@ -81,6 +83,7 @@ export function EditProduct() {
       setErrors(["Price and Quantity must be greater than 0."]);
       return;
     }
+    setLoading(true);
 
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -109,6 +112,8 @@ export function EditProduct() {
     } catch (error) {
       toast.error("Could not update product!");
       console.error("Error creating product:", error);
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -168,7 +173,10 @@ export function EditProduct() {
             ))}
           </ul>
         )}
-        <Button onClick={handleSubmit}>Update Product</Button>
+        <Button onClick={handleSubmit} disabled={loading}>
+        {loading && <LoaderCircle className="animate-spin" />}
+        {!loading && <div>Update Product</div>}
+        </Button>
       </CardContent>
     </Card>
   );

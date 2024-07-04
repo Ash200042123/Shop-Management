@@ -1,5 +1,50 @@
 import { Sales } from "@prisma/client";
 import { prisma } from "../db";
+import { subWeeks, subMonths } from 'date-fns';
+
+
+
+export const findSalesForPastWeek = async () => {
+  const oneWeekAgo = subWeeks(new Date(), 1);
+
+  return prisma.sales.findMany({
+    where: {
+      saleDate: {
+        gte: oneWeekAgo,
+      },
+    },
+    select: {
+      quantity: true,
+      product: {
+        select: {
+          price: true,
+        },
+      },
+    },
+  });
+};
+
+export const findSalesForPastMonth = async () => {
+  const oneMonthAgo = subMonths(new Date(), 1);
+
+  return prisma.sales.findMany({
+    where: {
+      saleDate: {
+        gte: oneMonthAgo,
+      },
+    },
+    select: {
+      quantity: true,
+      product: {
+        select: {
+          price: true,
+        },
+      },
+    },
+  });
+};
+
+
 
 export const createSale = async (userId: number, productId: number, quantity: number) => {
     return await prisma.sales.create({

@@ -13,12 +13,14 @@ import { Label } from "@/components/ui/label";
 import { getCookie } from "@/utils/cookie-utils";
 
 import axios from "axios";
+import { LoaderCircle } from "lucide-react";
 import { ChangeEvent, useEffect, useState } from "react";
 import {  useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 
 export function EditEmployee() {
+  const [loading, setLoading] = useState(false);
   const { employeeId } = useParams();
   const navigate = useNavigate();
   const token = getCookie();
@@ -74,10 +76,12 @@ export function EditEmployee() {
   };
 
   const handleSubmit = async () => {
+    
     if (!formValues.email) {
       setErrors(["Email must not be empty."]);
       return;
     }
+    setLoading(true);
 
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -99,6 +103,8 @@ export function EditEmployee() {
     } catch (error) {
       toast.error("Could not update employee!");
       console.error("Error updating employee:", error);
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -156,7 +162,10 @@ export function EditEmployee() {
             ))}
           </div>
         )}
-        <Button onClick={handleSubmit}>Save</Button>
+        <Button onClick={handleSubmit} disabled={loading}>
+          {loading && <LoaderCircle className="animate-spin" />}
+        {!loading && <div>Submit</div>}
+        </Button>
       </CardContent>
     </Card>
   );

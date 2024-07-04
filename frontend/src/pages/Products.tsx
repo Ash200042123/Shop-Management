@@ -1,9 +1,4 @@
-import {
-  File,
-  ListFilter,
-  MoreHorizontal,
-  PlusCircle,
-} from "lucide-react";
+import { File, ListFilter, MoreHorizontal, PlusCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -33,13 +28,16 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { getCookie } from "@/utils/cookie-utils";
+import ReactToPrint from "react-to-print";
+import { toast } from "sonner";
 
 export function Products() {
   const [products, setProducts] = useState<Product[]>([]);
-  const token= getCookie();
+  const token = getCookie();
+  const componentRef = useRef(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -50,11 +48,11 @@ export function Products() {
           throw new Error("Backend URL is not defined");
         }
 
-        const response = await axios.get(`${backendUrl}/products`,{
+        const response = await axios.get(`${backendUrl}/products`, {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         });
         const fetchedProducts = response.data.products.map((product: any) => ({
           id: product.id,
@@ -72,9 +70,7 @@ export function Products() {
     fetchProducts();
   }, []);
 
-  
-
-  const handleDelete = async (name:string) => {
+  const handleDelete = async (name: string) => {
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -82,155 +78,167 @@ export function Products() {
         throw new Error("Backend URL is not defined");
       }
 
-      const response = await axios.delete(`${backendUrl}/products/${name}`,{
+      const response = await axios.delete(`${backendUrl}/products/${name}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   return (
     <Tabs defaultValue="all">
-              <div className="flex items-center">
-                <TabsList>
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="active">Active</TabsTrigger>
-                  <TabsTrigger value="draft">Draft</TabsTrigger>
-                  <TabsTrigger value="archived" className="hidden sm:flex">
-                    Archived
-                  </TabsTrigger>
-                </TabsList>
-                <div className="ml-auto flex items-center gap-2">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-8 gap-1">
-                        <ListFilter className="h-3.5 w-3.5" />
-                        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                          Filter
-                        </span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuCheckboxItem checked>
-                        Active
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem>Draft</DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem>
-                        Archived
-                      </DropdownMenuCheckboxItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  <Button size="sm" variant="outline" className="h-8 gap-1">
-                    <File className="h-3.5 w-3.5" />
-                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                      Export
-                    </span>
-                  </Button>
-                  <Link to="/products/add">
-                    <Button size="sm" className="h-8 gap-1">
-                      <PlusCircle className="h-3.5 w-3.5" />
-                      <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                        Add Product
-                      </span>
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-              <TabsContent value="all">
-                <Card x-chunk="dashboard-06-chunk-0">
-                  <CardHeader>
-                    <CardTitle>Products</CardTitle>
-                    <CardDescription>
-                      Manage your products and view their sales performance.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="hidden w-[100px] sm:table-cell">
-                            <span className="sr-only">Image</span>
-                          </TableHead>
-                          <TableHead>Name</TableHead>
-                          <TableHead className="hidden md:table-cell">
-                            Price
-                          </TableHead>
-                          <TableHead className="hidden md:table-cell">
-                            Stock
-                          </TableHead>
-                          <TableHead className="hidden md:table-cell">
-                            Total Sales
-                          </TableHead>
+      <div className="flex items-center">
+        <TabsList>
+          <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="active">Active</TabsTrigger>
+          <TabsTrigger value="draft">Draft</TabsTrigger>
+          <TabsTrigger value="archived" className="hidden sm:flex">
+            Archived
+          </TabsTrigger>
+        </TabsList>
+        <div className="ml-auto flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 gap-1">
+                <ListFilter className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  Filter
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem checked>
+                Active
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Draft</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Archived</DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <ReactToPrint
+            trigger={() => {
+              return (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 gap-1 text-sm"
+                >
+                  <File className="h-3.5 w-3.5" />
+                  <span className="sr-only sm:not-sr-only">Export</span>
+                </Button>
+              );
+            }}
+            content={() => componentRef.current}
+            documentTitle="All Products"
+            pageStyle="print"
+            onAfterPrint={() => {
+              toast.success("All Products Printed!");
+            }}
+          />
+          <Link to="/products/add">
+            <Button size="sm" className="h-8 gap-1">
+              <PlusCircle className="h-3.5 w-3.5" />
+              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                Add Product
+              </span>
+            </Button>
+          </Link>
+        </div>
+      </div>
+      <TabsContent value="all">
+        <Card x-chunk="dashboard-06-chunk-0" ref={componentRef}>
+          <CardHeader>
+            <CardTitle>Products</CardTitle>
+            <CardDescription>
+              Manage your products and view their sales performance.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="hidden w-[100px] sm:table-cell">
+                    <span className="sr-only">Image</span>
+                  </TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead className="hidden md:table-cell">Price</TableHead>
+                  <TableHead className="hidden md:table-cell">Stock</TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Total Sales
+                  </TableHead>
 
-                          <TableHead>
-                            <span className="sr-only">Actions</span>
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {products.map((product) => (
-                          <TableRow
-                            key={product.productId}
-                            
+                  <TableHead>
+                    <span className="sr-only">Actions</span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {products.map((product) => (
+                  <TableRow key={product.productId}>
+                    <TableCell className="hidden sm:table-cell">
+                      <img
+                        alt="Product image"
+                        className="aspect-square rounded-md object-cover"
+                        height="64"
+                        src="/placeholder.svg"
+                        width="64"
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {product.productName}
+                    </TableCell>
+
+                    <TableCell className="hidden md:table-cell">
+                      {product.productPrice}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {product.quantity}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      SALES
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            aria-haspopup="true"
+                            size="icon"
+                            variant="ghost"
                           >
-                            <TableCell className="hidden sm:table-cell">
-                              <img
-                                alt="Product image"
-                                className="aspect-square rounded-md object-cover"
-                                height="64"
-                                src="/placeholder.svg"
-                                width="64"
-                              />
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              {product.productName}
-                            </TableCell>
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-                            <TableCell className="hidden md:table-cell">
-                              {product.productPrice}
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">
-                              {product.quantity}
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">
-                              SALES
-                            </TableCell>
-                            <TableCell>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    aria-haspopup="true"
-                                    size="icon"
-                                    variant="ghost"
-                                  >
-                                    <MoreHorizontal className="h-4 w-4" />
-                                    <span className="sr-only">Toggle menu</span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                  
-                                  <DropdownMenuItem><Link to={`/products/${product.productName}`}>Edit</Link></DropdownMenuItem>
-                                  <DropdownMenuItem onClick={()=>{handleDelete(product.productName)}}>Delete</DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        
-                        
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                  
-                </Card>
-              </TabsContent>
-            </Tabs>
+                          <DropdownMenuItem>
+                            <Link to={`/products/${product.productName}`}>
+                              Edit
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              handleDelete(product.productName);
+                            }}
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
   );
 }

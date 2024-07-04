@@ -23,9 +23,11 @@ import axios from "axios";
 import { ChangeEvent, useEffect, useState } from "react";
 import { getCookie } from "@/utils/cookie-utils";
 import { toast } from "sonner";
+import { LoaderCircle } from "lucide-react";
 
 
 export function CreateOrder() {
+  const [loading, setLoading] = useState(false);
   const [formValues, setFormValues] = useState<{
     userId: string;
     customerName: string;
@@ -103,6 +105,7 @@ export function CreateOrder() {
   };
 
   const handleSubmit = async () => {
+    setLoading(true);
     const filteredProducts = formValues.products.filter(
       (product) => product.added
     );
@@ -133,6 +136,8 @@ export function CreateOrder() {
     } catch (error) {
       toast.error("Error Creating Product!");
       console.log(error);
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -226,8 +231,11 @@ export function CreateOrder() {
         <Button
           onClick={handleSubmit}
           className="flex justify-center items-center w-1/2 mx-auto"
+          disabled={loading}
         >
-          Submit
+          {loading && <LoaderCircle className="animate-spin" />}
+          {!loading && <div>Submit</div>}
+          
         </Button>
       </CardContent>
     </Card>
