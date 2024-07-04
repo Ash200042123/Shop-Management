@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/sonner";
 import { getCookie } from "@/utils/cookie-utils";
 import { Navigate, Outlet } from "react-router-dom"
 
@@ -12,6 +13,7 @@ const AuthLayout = () => {
 
   return (
     <div>
+        <Toaster />
         <Outlet />
     </div>
   )

@@ -1,4 +1,4 @@
-import { createSale, deleteSaleById, getAllSales, getSalesByProductId, getSalesByUserId, updateSaleById } from "../repositories/sale-repository";
+import { createSale, deleteSaleById, getAllSales, getSalesByProductId, getSalesByUserId, getSalesProductWise, updateSaleById } from "../repositories/sale-repository";
 
 
 export const createSaleService = async (userId: number, productId: number, quantity: number) => {
@@ -13,6 +13,20 @@ export const createSaleService = async (userId: number, productId: number, quant
 
 export const getAllSalesService = async () => {
     const sales = await getAllSales();
+    return sales.map(sale => ({
+        id: sale.id,
+        userId: sale.userId,
+        productId: sale.productId,
+        productName: sale.product.name,
+        totalPrice: sale.product.price * sale.quantity,
+        saleDate: sale.saleDate,
+        quantity: sale.quantity,
+      }));
+    
+};
+
+export const getAllSalesByProduct = async () => {
+    const sales = await getSalesProductWise();
     return sales;
 };
 

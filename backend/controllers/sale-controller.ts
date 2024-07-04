@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createSaleService, getAllSalesService, getSalesByProduct, getSalesByUser, removeSale, updateSale } from "../services/sale-service";
+import { createSaleService, getAllSalesByProduct, getAllSalesService, getSalesByProduct, getSalesByUser, removeSale, updateSale } from "../services/sale-service";
 
 export const createSaleController = async (req: Request, res: Response) => {
     const { userId, productId, quantity } = req.body;
@@ -80,6 +80,16 @@ export const updateSaleController = async (req: Request, res: Response) => {
     }
 };
 
+export const getSalesProductWiseController = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const salesProductWise = await getAllSalesByProduct();
+  
+      res.status(200).json(salesProductWise);
+    } catch (error) {
+      console.error('Error getting all sales:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  };
 
 
 export const deleteSaleController = async (req: Request, res: Response) => {

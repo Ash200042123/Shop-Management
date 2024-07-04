@@ -17,6 +17,7 @@ import { Invoices } from "./pages/invoices";
 import { ViewInvoice } from "./pages/view-invoice";
 import { DashboardLayout } from "./layouts/dashboard-layout";
 import AuthLayout from "./layouts/auth-layout";
+import { Sales } from "./pages/sales";
 
 const router = createBrowserRouter([
   {
@@ -66,6 +67,10 @@ const router = createBrowserRouter([
       {
         path: "/invoices/:invoiceId",
         element: <ViewInvoice />,
+      },
+      {
+        path: "/sales",
+        element: <Sales />,
       },
     ],
   },

@@ -5,6 +5,7 @@ import productRoutes from './routes/product-routes';
 import orderRoutes from './routes/order-routes';
 import userRoutes from './routes/user-routes';
 import invoiceRoutes from './routes/invoice-routes';
+import salesRoutes from './routes/sale-routes';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use('/api',userRoutes);
 app.use('/api', productRoutes);
 app.use('/api',orderRoutes);
 app.use('/api',invoiceRoutes);
+app.use('/api',salesRoutes);
 
 
 
