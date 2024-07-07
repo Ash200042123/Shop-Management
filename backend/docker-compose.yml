@@ -1,17 +1,10 @@
 version: '3.8'
-
 services:
-  postgres:
+  shopManagement:
     image: postgres:latest
-    container_name: postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: abcd@1234
-      POSTGRES_DB: shop_management
     ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
+      - 5434:5432
+    environment:
+      POSTGRES_USER: shopAdmin
+      POSTGRES_PASSWORD: abcd1234
+      POSTGRES_DB: shop_management

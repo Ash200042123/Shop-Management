@@ -1,0 +1,20 @@
+import { Router } from "express";
+import { createSaleController, getAllSalesController, getSalesByProductController, getSalesByUserController, getSalesForPastMonth, getSalesForPastWeek, getSalesProductWiseController, updateSaleController } from "../controllers/sale-controller";
+import { deleteSaleById } from "../repositories/sale-repository";
+import { adminMiddleware, authMiddleware } from "../middlewares/authMiddleware";
+
+
+const router= Router();
+
+router.post("/sales",authMiddleware,createSaleController);
+router.get("/sales/week",authMiddleware,getSalesForPastWeek);
+router.get("/sales/month",authMiddleware,getSalesForPastMonth);
+router.get("/sales/details",authMiddleware,getAllSalesController);
+router.get("/sales",authMiddleware,getSalesProductWiseController);
+router.get("/sales/:userId",authMiddleware,getSalesByUserController);
+router.get("/sales/:productId",authMiddleware,getSalesByProductController);
+router.put("/sales/:salesId",adminMiddleware,updateSaleController);
+router.delete("/sales/:saleId",adminMiddleware,deleteSaleById);
+
+
+export default router;
