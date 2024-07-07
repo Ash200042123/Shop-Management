@@ -31,11 +31,11 @@ export function CreateOrder() {
   const [formValues, setFormValues] = useState<{
     userId: string;
     customerName: string;
-    products: { productId: number; quantity: number; added: boolean }[];
+    products: { productId: number; quantity: number; added: boolean, stock: number }[];
   }>({
     userId: "",
     customerName: "",
-    products: [{ productId: 0, quantity: 0, added: false }],
+    products: [{ productId: 0, quantity: 0, added: false, stock:0 }],
   });
   const token = getCookie();
   const [errors, setErrors] = useState<string[]>([]);
@@ -48,7 +48,7 @@ export function CreateOrder() {
         if (!backendUrl) {
           throw new Error("Backend URL is not defined");
         }
-        const response = await axios.get(`${backendUrl}/products`,{
+        const response = await axios.get(`${backendUrl}/products`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -59,21 +59,28 @@ export function CreateOrder() {
         console.error("Error fetching products:", error);
       }
     };
-
+  
     fetchProducts();
   }, []);
+  
+  const handleProductChange = (index: number, productId: string) => {
+    const selectedProduct = products.find(product => product.id.toString() === productId);
+    const newProducts = [...formValues.products];
+    newProducts[index].productId = parseInt(productId, 10);
+    if (selectedProduct) {
+      newProducts[index].stock = selectedProduct.stock; 
+    }
+    setFormValues((prevValues) => ({ ...prevValues, products: newProducts }));
+    clearError(index);
+  };
+  
 
   const handleFieldChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormValues((prevValues) => ({ ...prevValues, [name]: value }));
   };
 
-  const handleProductChange = (index: number, productId: string) => {
-    const newProducts = [...formValues.products];
-    newProducts[index].productId = parseInt(productId, 10); // Convert productId to integer
-    setFormValues((prevValues) => ({ ...prevValues, products: newProducts }));
-    clearError(index);
-  };
+  
 
   const handleQuantityChange = (index: number, quantity: string) => {
     const newProducts = [...formValues.products];
@@ -94,7 +101,7 @@ export function CreateOrder() {
 
     const newProducts = [...formValues.products];
     newProducts[index].added = true;
-    newProducts.push({ productId: 0, quantity: 0, added: false });
+    newProducts.push({ productId: 0, quantity: 0, added: false, stock:0 });
     setFormValues((prevValues) => ({ ...prevValues, products: newProducts }));
   };
 
@@ -171,56 +178,57 @@ export function CreateOrder() {
           </div>
         </div>
         <div className="space-y-4">
-          {formValues.products.map((product, index) => (
-            <div key={index} className="grid grid-cols-12 gap-4">
-              <div className="col-span-4">
-                <Label htmlFor={`product-${index}`}>Product</Label>
-                <div id={`product-${index}`}>
-                  <Select
-                    value={product.productId.toString()}
-                    onValueChange={(value) => handleProductChange(index, value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a product" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Products</SelectLabel>
-                        {products.map((product) => (
-                          <SelectItem
-                            key={product.id}
-                            value={product.id.toString()}
-                          >
-                            {product.name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="col-span-3">
-                <Label htmlFor={`quantity-${index}`}>Quantity</Label>
-                <Input
-                  id={`quantity-${index}`}
-                  type="number"
-                  value={product.quantity}
-                  onChange={(e) => handleQuantityChange(index, e.target.value)}
-                  min={1}
-                />
-              </div>
-              <div className="col-span-2 flex items-end">
-                <Button
-                  onClick={() => handleAddProduct(index)}
-                  disabled={product.added}
-                  className="w-full"
-                >
-                  {product.added ? "Added" : "Add"}
-                </Button>
-              </div>
+      {formValues.products.map((product, index) => (
+        <div key={index} className="grid grid-cols-12 gap-4">
+          <div className="col-span-4">
+            <Label htmlFor={`product-${index}`}>Product</Label>
+            <div id={`product-${index}`}>
+              <Select
+                value={product.productId.toString()}
+                onValueChange={(value) => handleProductChange(index, value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a product" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Products</SelectLabel>
+                    {products.map((product) => (
+                      <SelectItem
+                        key={product.id}
+                        value={product.id.toString()}
+                      >
+                        {product.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
-          ))}
+          </div>
+          <div className="col-span-3">
+            <Label htmlFor={`quantity-${index}`}>Quantity</Label>
+            <Input
+              id={`quantity-${index}`}
+              type="number"
+              value={product.quantity}
+              onChange={(e) => handleQuantityChange(index, e.target.value)}
+              min={1}
+              max={product.stock} // set max to the product's stock
+            />
+          </div>
+          <div className="col-span-2 flex items-end">
+            <Button
+              onClick={() => handleAddProduct(index)}
+              disabled={product.added}
+              className="w-full"
+            >
+              {product.added ? "Added" : "Add"}
+            </Button>
+          </div>
         </div>
+      ))}
+    </div>
         {errors.length > 0 && (
           <div className="text-red-500">
             {errors.map((error, index) => (
