@@ -4,17 +4,18 @@ import { Request, Response } from 'express';
 import { createOrderService, deleteOrderByUserService, deleteOrderService, getAllOrdersByUserId, getAllOrdersService, getOrderByOrderId, updateOrderStatusService } from '../services/order-service';
 import { Status } from '@prisma/client';
 import { deleteInvoiceByUserService } from '../services/invoice-service';
+import { CreateOrder, DeleteOrder, GetOrderByOrderId, GetOrdersByUserId, UpdateOrderSatus } from '../validators/order-validator';
 
-export const createOrderController = async (req: Request, res: Response) => {
+export const createOrderController = async (req: Request<unknown, unknown, CreateOrder>, res: Response) => {
     const { userId,customerName, products } = req.body;
 
     try {
-        const userIdInt = parseInt(userId, 10);
-        if (!userIdInt || !products || !Array.isArray(products) || products.length === 0) {
+        // const userIdInt = parseInt(userId, 10);
+        if (!userId || !products || !Array.isArray(products) || products.length === 0) {
             return res.status(400).json({ error: 'Invalid order data!' });
         }
 
-        const { order, invoice } = await createOrderService(userIdInt,customerName, products);
+        const { order, invoice } = await createOrderService(userId,customerName, products);
         return res.status(200).json({ message: 'Order created successfully!', order, invoice });
     } catch (error) {
         console.error('Error occurred:', error);
@@ -24,7 +25,7 @@ export const createOrderController = async (req: Request, res: Response) => {
 
 
 
-export const getAllOrdersByUserIdController = async (req:Request, res:Response) => {
+export const getAllOrdersByUserIdController = async (req:Request<GetOrdersByUserId>, res:Response) => {
     const userId = parseInt(req.params.userId);
 
     try{
@@ -42,7 +43,7 @@ export const getAllOrdersByUserIdController = async (req:Request, res:Response) 
 };
 
 
-export const getOrderByOrderIdController = async (req:Request, res:Response) => {
+export const getOrderByOrderIdController = async (req:Request<GetOrderByOrderId>, res:Response) => {
     const orderId = parseInt(req.params.orderId);
 
     try{
@@ -72,21 +73,21 @@ export const getAllOrdersController = async (req:Request, res:Response)=>{
 };
 
 
-export const updateOrderStatusController = async(req:Request, res:Response)=>{
+export const updateOrderStatusController = async(req:Request<unknown, unknown, UpdateOrderSatus>, res:Response)=>{
 
     const {orderId, status}=req.body;
 
     try {
-        const orderIntId = parseInt(orderId);
-        if(!orderIntId || !status){
+        // const orderIntId = parseInt(orderId);
+        if(!orderId || !status){
             return res.status(400).json({message:"Order ID and Status is required"});
         }
 
-        if (!Object.values(Status).includes(status)) {
+        if (!(status in Status)) {
             return res.status(400).json({ error: 'Invalid status value!' });
-        }
+          }
 
-        const order = await updateOrderStatusService(orderIntId,status);
+        const order = await updateOrderStatusService(orderId,status as Status);
         return res.status(200).json({order});
     } catch (error) {
         console.error('Error occured',error);
@@ -95,7 +96,7 @@ export const updateOrderStatusController = async(req:Request, res:Response)=>{
 };
 
 
-export const deleteOrderController = async(req:Request, res:Response)=>{
+export const deleteOrderController = async(req:Request<unknown, unknown, DeleteOrder>, res:Response)=>{
 
     const {orderId}=req.body;
 
