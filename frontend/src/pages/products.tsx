@@ -1,4 +1,4 @@
-import { File, MoreHorizontal, PlusCircle } from "lucide-react";
+import { File, ListFilter, MoreHorizontal, PlusCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,9 +10,11 @@ import {
 } from "@/components/ui/card";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -23,7 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
@@ -32,14 +34,13 @@ import { getCookie } from "@/utils/cookie-utils";
 import ReactToPrint from "react-to-print";
 import { toast } from "sonner";
 
-export function Employees() {
-  const [employees, setEmployees] = useState<User[]>([]);
-  const [accessDenied, setAccessDenied] = useState<boolean>(false);
+export function Products() {
+  const [products, setProducts] = useState<Product[]>([]);
   const token = getCookie();
   const componentRef = useRef(null);
 
   useEffect(() => {
-    const fetchEmployees = async () => {
+    const fetchProducts = async () => {
       try {
         const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -47,32 +48,29 @@ export function Employees() {
           throw new Error("Backend URL is not defined");
         }
 
-        const response = await axios.get(`${backendUrl}/employees`,{
+        const response = await axios.get(`${backendUrl}/products`, {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         });
-        const fetchedEmployees = response.data.users.map((employee: any) => ({
-          id: employee.id,
-          email: employee.email,
-          name: employee.name,
-          role: employee.role,
-          unitsSold: employee.unitsSold,
+        const fetchedProducts = response.data.products.map((product: any) => ({
+          id: product.id,
+          productName: product.name,
+          description: product.description,
+          productPrice: product.price,
+          quantity: product.stock,
         }));
-        setEmployees(fetchedEmployees);
+        setProducts(fetchedProducts);
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 403) {
-          setAccessDenied(true);
-        } 
-        console.error("Error fetching employees:", error);
+        console.error("Error fetching orders:", error);
       }
     };
 
-    fetchEmployees();
+    fetchProducts();
   }, []);
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (name: string) => {
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -80,80 +78,73 @@ export function Employees() {
         throw new Error("Backend URL is not defined");
       }
 
-       await axios.delete(`${backendUrl}/employees/${id}`);
+       await axios.delete(`${backendUrl}/products/${name}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
     } catch (error) {
       console.log(error);
     }
   };
 
-
-  if (accessDenied) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="p-4 border border-red-400 rounded-lg bg-red-100">
-          <h1 className="text-xl font-semibold text-red-600">
-            You don't have access to this page
-          </h1>
-        </div>
-      </div>
-    );
-  }
-
-  
   return (
     <Tabs defaultValue="all">
       <div className="flex items-center">
-        {/* <TabsList>
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="active">Active</TabsTrigger>
-                  <TabsTrigger value="draft">Draft</TabsTrigger>
-                  <TabsTrigger value="archived" className="hidden sm:flex">
-                    Archived
-                  </TabsTrigger>
-                </TabsList> */}
+        <TabsList>
+          <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="active">Active</TabsTrigger>
+          <TabsTrigger value="draft">Draft</TabsTrigger>
+          <TabsTrigger value="archived" className="hidden sm:flex">
+            Archived
+          </TabsTrigger>
+        </TabsList>
         <div className="ml-auto flex items-center gap-2">
-          {/* <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-8 gap-1">
-                        <ListFilter className="h-3.5 w-3.5" />
-                        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                          Filter
-                        </span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuCheckboxItem checked>
-                        Active
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem>Draft</DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem>
-                        Archived
-                      </DropdownMenuCheckboxItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu> */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 gap-1">
+                <ListFilter className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  Filter
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem checked>
+                Active
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Draft</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Archived</DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <ReactToPrint
-              trigger={() => {
-                return <Button
+            trigger={() => {
+              return (
+                <Button
                   size="sm"
                   variant="outline"
                   className="h-7 gap-1 text-sm"
                 >
                   <File className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only">Export</span>
-                </Button>;
-              }}
-              content={()=>componentRef.current}
-              documentTitle="All Employees"
-              pageStyle="print"
-              onAfterPrint={()=>{toast.success("Employees List printed!")}}
-            />
-          <Link to="/employees/add">
+                </Button>
+              );
+            }}
+            content={() => componentRef.current}
+            documentTitle="All Products"
+            pageStyle="print"
+            onAfterPrint={() => {
+              toast.success("All Products Printed!");
+            }}
+          />
+          <Link to="/products/add">
             <Button size="sm" className="h-8 gap-1">
               <PlusCircle className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Add Employee
+                Add Product
               </span>
             </Button>
           </Link>
@@ -162,9 +153,9 @@ export function Employees() {
       <TabsContent value="all">
         <Card x-chunk="dashboard-06-chunk-0" ref={componentRef}>
           <CardHeader>
-            <CardTitle>Employees</CardTitle>
+            <CardTitle>Products</CardTitle>
             <CardDescription>
-              Manage your employees and view their sales.
+              Manage your products and view their sales performance.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -175,11 +166,9 @@ export function Employees() {
                     <span className="sr-only">Image</span>
                   </TableHead>
                   <TableHead>Name</TableHead>
-                  <TableHead className="hidden md:table-cell">Email</TableHead>
-                  <TableHead className="hidden md:table-cell">Role</TableHead>
-                  <TableHead className="hidden md:table-cell">
-                    Total Units Sold
-                  </TableHead>
+                  <TableHead className="hidden md:table-cell">Price</TableHead>
+                  <TableHead className="hidden md:table-cell">Stock</TableHead>
+                  
 
                   <TableHead>
                     <span className="sr-only">Actions</span>
@@ -187,11 +176,11 @@ export function Employees() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {employees.map((employee) => (
-                  <TableRow key={employee.id}>
+                {products.map((product) => (
+                  <TableRow key={product.productId}>
                     <TableCell className="hidden sm:table-cell">
                       <img
-                        alt="Employee Image"
+                        alt="Product image"
                         className="aspect-square rounded-md object-cover"
                         height="64"
                         src="/placeholder.svg"
@@ -199,18 +188,16 @@ export function Employees() {
                       />
                     </TableCell>
                     <TableCell className="font-medium">
-                      {employee.name}
+                      {product.productName}
                     </TableCell>
 
                     <TableCell className="hidden md:table-cell">
-                      {employee.email}
+                      {product.productPrice}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {employee.role}
+                      {product.quantity}
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {employee.unitsSold}
-                    </TableCell>
+                    
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -227,11 +214,13 @@ export function Employees() {
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
                           <DropdownMenuItem>
-                            <Link to={`/employees/${employee.id}`}>Edit</Link>
+                            <Link to={`/products/${product.productName}`}>
+                              Edit
+                            </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => {
-                              handleDelete(employee.id);
+                              handleDelete(product.productName);
                             }}
                           >
                             Delete

@@ -35,65 +35,51 @@ import {
 import {  useParams } from "react-router-dom";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { getCookie } from "@/utils/cookie-utils";
+import { useGetOrderQuery, useUpdateOrderMutation } from "@/api/order-slice";
 
 export function OrderDetailsPage() {
-  const [order, setOrder] = useState<Order>();
+  // const [order, setOrder] = useState<Order>();
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const { orderId } = useParams();
   const token= getCookie();
   const [loading, setLoading] = useState(false);
+  const [loader, setLoader] = useState(true);
+  const {
+    data:order,
+    isLoading,
+    isSuccess,
+    isError,
+    error
+} = useGetOrderQuery(orderId);
+  const [updateOrder] = useUpdateOrderMutation();
 
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-        if (!backendUrl) {
-          throw new Error("Backend URL is not defined");
+        if(isSuccess){
+          setLoader(false);
+        // setOrder(response.data.order);
+        setSelectedStatus(order.status);
+        console.log(order);
         }
-        const response = await axios.get(`${backendUrl}/orders/${orderId}`,{
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        setOrder(response.data.order);
-        setSelectedStatus(response.data.order.status);
-        console.log(response.data.order);
       } catch (error) {
         console.error("Error fetching orders:", error);
       }
     };
 
     fetchOrder();
-  }, [orderId]);
+  }, [orderId,isSuccess]);
 
-  if (!order) {
+  if (loader) {
     return <div>Loading...</div>;
   }
 
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-      if (!backendUrl) {
-        throw new Error("Backend URL is not defined");
-      }
-
-      const response = await axios.put(`${backendUrl}/orders`, {
-        orderId,
-        status: selectedStatus,
-      },{
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      console.log(response);
+      updateOrder({orderId:parseInt(orderId??'',10),
+        status: selectedStatus});
     } catch (error) {
       console.error("Error updating order:", error);
     }finally{
@@ -101,7 +87,7 @@ export function OrderDetailsPage() {
     }
   };
 
-  return (
+  return ( isSuccess && !isLoading && order && (
     <Card className="w-full max-w-3xl overflow-hidden items-center justify-center">
       <CardHeader className="flex flex-row items-start bg-muted/50">
         <div className="grid gap-0.5">
@@ -145,7 +131,7 @@ export function OrderDetailsPage() {
         <div className="grid gap-3">
           <div className="font-semibold">Order Details</div>
           <ul className="grid gap-3">
-            {order.products.map((product) => (
+            {order.products?.map((product:Product) => (
               <li
                 key={product.productId}
                 className="flex items-center justify-between"
@@ -259,5 +245,6 @@ export function OrderDetailsPage() {
         </Pagination>
       </CardFooter> */}
     </Card>
+  )
   );
 }
