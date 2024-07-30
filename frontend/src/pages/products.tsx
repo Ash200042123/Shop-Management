@@ -28,68 +28,34 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Link } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
-import axios from "axios";
-import { getCookie } from "@/utils/cookie-utils";
+import {  useRef } from "react";
 import ReactToPrint from "react-to-print";
 import { toast } from "sonner";
+import { useDeleteProductMutation, useGetProductsQuery } from "@/api/product-slice";
 
 export function Products() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const token = getCookie();
+
   const componentRef = useRef(null);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const {
+    data:products,
+    isSuccess,
+    
+} = useGetProductsQuery({});
 
-        if (!backendUrl) {
-          throw new Error("Backend URL is not defined");
-        }
+const [deleteProduct] =useDeleteProductMutation();
 
-        const response = await axios.get(`${backendUrl}/products`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        const fetchedProducts = response.data.products.map((product: any) => ({
-          id: product.id,
-          productName: product.name,
-          description: product.description,
-          productPrice: product.price,
-          quantity: product.stock,
-        }));
-        setProducts(fetchedProducts);
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      }
-    };
-
-    fetchProducts();
-  }, []);
 
   const handleDelete = async (name: string) => {
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-      if (!backendUrl) {
-        throw new Error("Backend URL is not defined");
-      }
-
-       await axios.delete(`${backendUrl}/products/${name}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+       deleteProduct({name})
     } catch (error) {
       console.log(error);
     }
   };
 
-  return (
+  return (isSuccess && (
     <Tabs defaultValue="all">
       <div className="flex items-center">
         <TabsList>
@@ -176,7 +142,7 @@ export function Products() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products.map((product) => (
+                {products && products.map((product:Product) => (
                   <TableRow key={product.productId}>
                     <TableCell className="hidden sm:table-cell">
                       <img
@@ -236,5 +202,6 @@ export function Products() {
         </Card>
       </TabsContent>
     </Tabs>
+  )
   );
 }

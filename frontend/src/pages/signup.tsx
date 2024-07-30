@@ -18,17 +18,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChangeEvent, useState } from "react";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
+import { useSignupMutation } from "@/api/auth-slice";
 
 
 
 export function Signup() {
 
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+
 
   const [formValues, setFormValues] = useState({
     fullName: "",
@@ -36,6 +36,8 @@ export function Signup() {
     email: "",
     password: "",
   });
+
+  const [signup, {isLoading}] = useSignupMutation();
 
   const handleFieldChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -53,17 +55,9 @@ export function Signup() {
   };
 
   const handleSubmit = async () => {
-    setLoading(true);
+    
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-      if (!backendUrl) {
-        throw new Error("Backend URL is not defined");
-      }
-      const response = await axios.post(
-        // backendUrl+ "/signup", 
-        `${backendUrl}/signup`,
-        {
+      signup({
         name: formValues.fullName,
         email: formValues.email,
         password: formValues.password,
@@ -71,12 +65,10 @@ export function Signup() {
       });
 
       toast.success("Sign Up successful!");
-      navigate("/auth/signup")
+      navigate("/auth/login")
     } catch (error) {
       toast.error("Could not Sign up!");
       console.log(error);
-    }finally{
-      setLoading(false);
     }
   };
 
@@ -144,9 +136,9 @@ export function Signup() {
                 onChange={handleFieldChange}
               />
             </div>
-            <Button type="submit" className="w-full" onClick={handleSubmit} disabled={loading}>
-            {loading && <LoaderCircle className="animate-spin" />}
-            {!loading && <div>Create an account</div>}
+            <Button type="submit" className="w-full" onClick={handleSubmit} disabled={isLoading}>
+            {isLoading && <LoaderCircle className="animate-spin" />}
+            {!isLoading && <div>Create an account</div>}
               
             </Button>
             {/* <Button variant="outline" className="w-full">

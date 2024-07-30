@@ -49,7 +49,7 @@ export function Homepage() {
     isSuccess,
     isError,
     error
-} = useGetOrdersQuery({});
+} = useGetOrdersQuery({},{pollingInterval:12000, skipPollingIfUnfocused:true});
 
 
 

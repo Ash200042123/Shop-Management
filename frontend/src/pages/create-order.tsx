@@ -28,7 +28,6 @@ import { useCreateOrderMutation } from "@/api/order-slice";
 
 
 export function CreateOrder() {
-  const [loading, setLoading] = useState(false);
   const [formValues, setFormValues] = useState<{
     userId: number;
     customerName: string;
@@ -42,7 +41,7 @@ export function CreateOrder() {
   const [errors, setErrors] = useState<string[]>([]);
   const [products, setProducts] = useState<{ id: number; name: string }[]>([]);
 
-  const [createOrder] = useCreateOrderMutation();
+  const [createOrder, { isLoading: isCreating,isSuccess: isCreated, error: createError }] = useCreateOrderMutation();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -115,7 +114,7 @@ export function CreateOrder() {
   };
 
   const handleSubmit = async () => {
-    setLoading(true);
+    
     const filteredProducts = formValues.products.filter(
       (product) => product.added
     );
@@ -126,8 +125,13 @@ export function CreateOrder() {
     // console.log(submitValues);
 
     createOrder(submitValues);
-    toast.success("Order Created Successfully!");
-    setLoading(false);
+    if(isCreated){
+      toast.success("Order Created Successfully!");
+    }
+    if(createError){
+      console.error(createError);
+    }
+
   };
 
   return (
@@ -221,10 +225,10 @@ export function CreateOrder() {
         <Button
           onClick={handleSubmit}
           className="flex justify-center items-center w-1/2 mx-auto"
-          disabled={loading}
+          disabled={isCreating}
         >
-          {loading && <LoaderCircle className="animate-spin" />}
-          {!loading && <div>Submit</div>}
+          {isCreating && <LoaderCircle className="animate-spin" />}
+          {!isCreating && <div>Submit</div>}
           
         </Button>
       </CardContent>

@@ -11,7 +11,7 @@ interface ApiResponse {
   }
 
 export const orderSlice = createApi({
-    reducerPath: 'api',
+    reducerPath: 'orderApi',
     baseQuery: fetchBaseQuery({baseUrl: backendUrl,prepareHeaders: (headers) => {
         const token = getCookie();
         if (token) {
@@ -21,7 +21,7 @@ export const orderSlice = createApi({
         headers.set('Content-Type', 'application/json');
         return headers;
       }}),
-    tagTypes: ['Orders'],
+    tagTypes: ['Orders', 'Order'],
     endpoints: (builder) => ({
         getOrders: builder.query({
             query: ()=>'/orders',
@@ -54,10 +54,11 @@ export const orderSlice = createApi({
                 method: 'PUT',
                 body: order
             }),
-            invalidatesTags: ['Orders']
+            invalidatesTags: ['Orders', 'Order']
         }),
         getOrder:builder.query({
           query: (orderId)=>`/orders/${orderId}`,
+          providesTags: ['Order']
         })
     })
 })
