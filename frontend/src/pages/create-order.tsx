@@ -19,12 +19,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import axios from "axios";
-import { ChangeEvent, useEffect, useState } from "react";
-import { getCookie } from "@/utils/cookie-utils";
+import { ChangeEvent,  useState } from "react";
 import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
 import { useCreateOrderMutation } from "@/api/order-slice";
+import { useGetProductsQuery } from "@/api/product-slice";
 
 
 export function CreateOrder() {
@@ -37,43 +36,26 @@ export function CreateOrder() {
     customerName: "",
     products: [{ productId: 0, quantity: 0, added: false, stock:0 }],
   });
-  const token = getCookie();
+
   const [errors, setErrors] = useState<string[]>([]);
-  const [products, setProducts] = useState<{ id: number; name: string }[]>([]);
 
-  const [createOrder, { isLoading: isCreating,isSuccess: isCreated, error: createError }] = useCreateOrderMutation();
+  const {data:products, isSuccess} = useGetProductsQuery({});
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL;
-        if (!backendUrl) {
-          throw new Error("Backend URL is not defined");
-        }
-        const response = await axios.get(`${backendUrl}/products`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        setProducts(response.data.products);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
+  const [createOrder, { isLoading: isCreating, error: createError }] = useCreateOrderMutation();
+
   
-    fetchProducts();
-  }, []);
   
   const handleProductChange = (index: number, productId: string) => {
-    const selectedProduct = products.find(product => product.id.toString() === productId);
+    if(products && isSuccess){
+    const selectedProduct = products.find(product => product.productId.toString() === productId);
     const newProducts = [...formValues.products];
     newProducts[index].productId = parseInt(productId, 10);
     if (selectedProduct) {
-      newProducts[index].stock = selectedProduct.stock; 
+      newProducts[index].stock = selectedProduct.quantity; 
     }
     setFormValues((prevValues) => ({ ...prevValues, products: newProducts }));
     clearError(index);
+  }
   };
   
 
@@ -124,10 +106,9 @@ export function CreateOrder() {
     };
     // console.log(submitValues);
 
-    createOrder(submitValues);
-    if(isCreated){
+    await createOrder(submitValues).unwrap();
       toast.success("Order Created Successfully!");
-    }
+    
     if(createError){
       console.error(createError);
     }
@@ -179,12 +160,12 @@ export function CreateOrder() {
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Products</SelectLabel>
-                    {products.map((product) => (
+                    {isSuccess && products.map((product) => (
                       <SelectItem
-                        key={product.id}
-                        value={product.id.toString()}
+                        key={product.productId}
+                        value={product.productId.toString()}
                       >
-                        {product.name}
+                        {product.productName}
                       </SelectItem>
                     ))}
                   </SelectGroup>

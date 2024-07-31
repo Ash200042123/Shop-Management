@@ -49,7 +49,7 @@ export function OrderDetailsPage() {
     isLoading,
     isSuccess,
 } = useGetOrderQuery(orderId);
-const [updateOrder, { isLoading: isUpdating, error: updateError }] = useUpdateOrderMutation();
+const [updateOrder, { isLoading: isUpdating }] = useUpdateOrderMutation();
 
 
   useEffect(() => {

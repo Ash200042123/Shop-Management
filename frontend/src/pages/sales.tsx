@@ -20,88 +20,35 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { useEffect, useRef, useState } from "react";
-import axios from "axios";
-import { getCookie } from "@/utils/cookie-utils";
+
 import ReactToPrint from "react-to-print";
 import { toast } from "sonner";
+import { useGetSalesDetailsQuery, useGetSalesSummaryQuery } from "@/api/sales-slice";
 
 export function Sales() {
-  const [sales, setSales] = useState<Sale[]>([]);
-  const [salesSummary, setSalesSummary] = useState<SalesSummary[]>([]);
-  const token = getCookie();
+  const {data: sales, isSuccess} = useGetSalesDetailsQuery({});
+  const {data: salesSummary} = useGetSalesSummaryQuery({});
+  const [filteredSales, setFilteredSales] = useState<{ week: Sale[]; month: Sale[] }>({ week: [], month: [] });
   const componentRef = useRef(null);
 
   useEffect(() => {
-    const fetchSales = async () => {
-      try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-        if (!backendUrl) {
-          throw new Error("Backend URL is not defined");
-        }
-
-        // Fetch detailed sales data
-        const detailedSalesResponse = await axios.get(
-          `${backendUrl}/sales/details`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        const detailedSales = detailedSalesResponse.data.map((sale: any) => ({
-          id: sale.id,
-          userId: sale.userId,
-          productId: sale.productId,
-          saleDate: new Date(sale.saleDate),
-          productName: sale.productName,
-          totalPrice: sale.totalPrice,
-          quantity: sale.quantity,
-        }));
-
-        setSales(detailedSales);
-
-        // Fetch sales summary data
-        const summaryResponse = await axios.get(`${backendUrl}/sales`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        setSalesSummary(summaryResponse.data);
-      } catch (error) {
-        console.error("Error fetching sales:", error);
-      }
-    };
-
-    fetchSales();
-  }, []);
-
-  const filteredSales = {
-    week: sales.filter((sale) => {
-      const saleDate = new Date(sale.saleDate);
-      const now = new Date();
-      const oneWeekAgo = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() - 7
-      );
-      return saleDate >= oneWeekAgo;
-    }),
-    month: sales.filter((sale) => {
-      const saleDate = new Date(sale.saleDate);
-      const now = new Date();
-      const oneMonthAgo = new Date(
-        now.getFullYear(),
-        now.getMonth() - 1,
-        now.getDate()
-      );
-      return saleDate >= oneMonthAgo;
-    }),
-  };
+    if (isSuccess && sales) {
+      setFilteredSales({
+        week: sales.filter((sale) => {
+          const saleDate = new Date(sale.saleDate);
+          const now = new Date();
+          const oneWeekAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+          return saleDate >= oneWeekAgo;
+        }),
+        month: sales.filter((sale) => {
+          const saleDate = new Date(sale.saleDate);
+          const now = new Date();
+          const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+          return saleDate >= oneMonthAgo;
+        }),
+      });
+    }
+  }, [isSuccess, sales]);
 
   return (
     <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
@@ -113,22 +60,23 @@ export function Sales() {
             <TabsTrigger value="month">Month</TabsTrigger>
           </TabsList>
           <div className="ml-auto flex items-center gap-2">
-            
-          <ReactToPrint
+            <ReactToPrint
               trigger={() => {
-                return <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 gap-1 text-sm"
-                >
-                  <File className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only">Export</span>
-                </Button>;
+                return (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 gap-1 text-sm"
+                  >
+                    <File className="h-3.5 w-3.5" />
+                    <span className="sr-only sm:not-sr-only">Export</span>
+                  </Button>
+                );
               }}
-              content={()=>componentRef.current}
+              content={() => componentRef.current}
               documentTitle="All Orders"
               pageStyle="print"
-              onAfterPrint={()=>{toast.success("PDF printed")}}
+              onAfterPrint={() => { toast.success("PDF printed"); }}
             />
           </div>
         </div>
@@ -150,7 +98,7 @@ export function Sales() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {salesSummary.map((summary: SalesSummary) => (
+                  {salesSummary && salesSummary.map((summary: SalesSummary) => (
                     <TableRow key={summary.productName}>
                       <TableCell>{summary.productName}</TableCell>
                       <TableCell>{summary.totalUnitsSold}</TableCell>
@@ -188,7 +136,7 @@ export function Sales() {
                       <TableCell>{sale.productName}</TableCell>
                       <TableCell>{sale.totalPrice}</TableCell>
                       <TableCell>
-                        {sale.saleDate.toLocaleDateString()}
+                        {new Date(sale.saleDate).toLocaleDateString()}
                       </TableCell>
                       <TableCell>{sale.quantity}</TableCell>
                     </TableRow>
@@ -224,7 +172,7 @@ export function Sales() {
                       <TableCell>{sale.productName}</TableCell>
                       <TableCell>{sale.totalPrice}</TableCell>
                       <TableCell>
-                        {sale.saleDate.toLocaleDateString()}
+                        {new Date(sale.saleDate).toLocaleDateString()}
                       </TableCell>
                       <TableCell>{sale.quantity}</TableCell>
                     </TableRow>

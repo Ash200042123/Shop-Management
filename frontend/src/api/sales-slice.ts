@@ -3,6 +3,10 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const backendUrl= import.meta.env.VITE_BACKEND_URL;
 
+interface ApiResponse {
+  sales: Sale[];
+}
+
 export const salesSlice = createApi({
     reducerPath: 'salesApi',
     baseQuery: fetchBaseQuery({baseUrl:backendUrl,prepareHeaders: (headers) => {
@@ -14,15 +18,36 @@ export const salesSlice = createApi({
         headers.set('Content-Type', 'application/json');
         return headers;
       }}),
-    tagTypes: ['Product'],
+    tagTypes: ['Sales'],
     endpoints: (builder)=>({
-        getProducts: builder.query({
-            query: ()=>'/products',
-            providesTags: ['Product']
+        getSalesDetails: builder.query({
+            query: ()=>'/sales/details',
+            transformResponse: (response: unknown) => {
+              const data = response as ApiResponse;
+              return data.sales.map((sale: any) => ({
+                id: sale.id,
+                userId: sale.userId,
+                productId: sale.productId,
+                saleDate: new Date(sale.saleDate),
+                productName: sale.productName,
+                totalPrice: sale.totalPrice,
+                quantity: sale.quantity,
+              }));
+            },
+            providesTags: ['Sales']
+        }),
+        getSalesSummary: builder.query({
+          query: ()=>'/sales',
+        }),
+        getWeeklySales: builder.query({
+          query: ()=>'/sales/week'
+        }),
+        getMonthlySales: builder.query({
+          query: ()=>'/sales/month'
         })
     })
 })
 
 
 
-export const {useGetProductsQuery} = salesSlice
+export const {useGetSalesDetailsQuery, useGetSalesSummaryQuery, useGetWeeklySalesQuery, useGetMonthlySalesQuery} = salesSlice

@@ -7,67 +7,39 @@ import {
 } from "@/components/ui/card";
 
 import { useParams } from "react-router-dom";
-
-import axios from "axios";
-import { useEffect, useRef, useState } from "react";
-import { getCookie } from "@/utils/cookie-utils";
+import {  useRef } from "react";
 import ReactToPrint from "react-to-print";
 import { Button } from "@/components/ui/button";
 import { File } from "lucide-react";
 import { toast } from "sonner";
+import { useGetInvoiceQuery } from "@/api/invoices-slice";
 
 interface Product {
   productId: number;
   quantity: number;
 }
 
-interface Invoice {
-  id: number;
-  userId: number;
-  customerName: string;
-  employeeName: string;
-  products: Product[]; 
-  invoiceDate: string;
-  totalAmount: number;
-}
+// interface Invoice {
+//   id: number;
+//   userId: number;
+//   customerName: string;
+//   employeeName: string;
+//   products: Product[]; 
+//   invoiceDate: string;
+//   totalAmount: number;
+// }
 
 export function ViewInvoice() {
   const { invoiceId } = useParams();
-  const [invoice, setInvoice] = useState<Invoice | null>(null);
-  const token = getCookie(); 
+  const {data:invoice, isSuccess, isLoading} = useGetInvoiceQuery(invoiceId);
   const componentRef = useRef(null);
 
-  useEffect(() => {
-    const fetchInvoice = async () => {
-      try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-        if (!backendUrl) {
-          throw new Error("Backend URL is not defined");
-        }
-
-        const response = await axios.get<Invoice>(
-          `${backendUrl}/invoices/${invoiceId}`,{
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-        setInvoice(response.data);
-      } catch (error) {
-        console.error("Error fetching invoice:", error);
-      }
-    };
-
-    fetchInvoice();
-  }, [invoiceId]);
-
-  if (!invoice) {
-    return null; // Handle loading state or error here
+  if (isLoading) {
+    return null; 
   }
 
-  // Parse products JSON string to array
+
   const products = JSON.parse(invoice.products);
 
   return (
@@ -91,7 +63,7 @@ export function ViewInvoice() {
         />
       </div>
     <div className="sm:py-8 sm:px-8" ref={componentRef}>
-      <Card className="w-full p-6 shadow-md">
+     {isSuccess && ( <Card className="w-full p-6 shadow-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl">View Invoice</CardTitle>
           <CardDescription>
@@ -149,6 +121,7 @@ export function ViewInvoice() {
           </div>
         </CardContent>
       </Card>
+     )}
     </div>
     </div>
   );

@@ -25,63 +25,21 @@ import {
 } from "@/components/ui/table";
 
 import { Link } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
-import axios from "axios";
-import { getCookie } from "@/utils/cookie-utils";
+import { useRef } from "react";
+
 import ReactToPrint from "react-to-print";
 import { toast } from "sonner";
+import { useDeleteInvoiceMutation, useGetInvoicesQuery } from "@/api/invoices-slice";
 
 export function Invoices() {
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const token = getCookie();
+  const {data:invoices,isSuccess} = useGetInvoicesQuery({});
+  const [deleteInvoice] = useDeleteInvoiceMutation();
   const componentRef = useRef(null);
 
-  useEffect(() => {
-    const fetchInvoices = async () => {
-      try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-        if (!backendUrl) {
-          throw new Error("Backend URL is not defined");
-        }
-
-        const response = await axios.get(`${backendUrl}/invoices`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        const fetchedInvoices = response.data.invoices.map((invoice: any) => ({
-          id: invoice.id,
-          userId: invoice.userId,
-          orderId: invoice.orderId,
-          invoiceDate: new Date(invoice.invoiceDate),
-          totalAmount: invoice.totalAmount,
-        }));
-        setInvoices(fetchedInvoices);
-      } catch (error) {
-        console.error("Error fetching invoices:", error);
-      }
-    };
-
-    fetchInvoices();
-  }, []);
 
   const handleDelete = async (id: number) => {
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-      if (!backendUrl) {
-        throw new Error("Backend URL is not defined");
-      }
-
-      await axios.delete(`${backendUrl}/invoices/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      setInvoices(invoices.filter((invoice) => invoice.id !== id));
+      await deleteInvoice(id);
     } catch (error) {
       console.log(error);
     }
@@ -126,7 +84,7 @@ export function Invoices() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {invoices.map((invoice) => (
+              {isSuccess && (invoices.map((invoice) => (
                 <TableRow key={invoice.id}>
                   <TableCell>{invoice.id}</TableCell>
                   <TableCell>{invoice.userId}</TableCell>
@@ -164,7 +122,7 @@ export function Invoices() {
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>
-              ))}
+              )))}
             </TableBody>
           </Table>
         </CardContent>

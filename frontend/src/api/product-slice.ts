@@ -58,7 +58,7 @@ export const productSlice = createApi({
             url: `/products/${name}`,
             method: 'DELETE',
         }),
-        invalidatesTags: ['Products']
+        invalidatesTags: ['Products','Product']
     }),
     getProduct:builder.query({
         query: (productName)=>`/products/${productName}`,

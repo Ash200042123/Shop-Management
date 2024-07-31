@@ -1,4 +1,4 @@
-import { File, ListFilter } from "lucide-react";
+import { File, ListFilter, LoaderCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,17 +29,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
-import axios from "axios";
+import {  useRef } from "react";
 import ReactToPrint from "react-to-print";
-import { getCookie } from "@/utils/cookie-utils";
 import { toast } from "sonner";
 import { useGetOrdersQuery } from "@/api/order-slice";
+import { useGetMonthlySalesQuery, useGetWeeklySalesQuery } from "@/api/sales-slice";
 
 export function Homepage() {
-  // const [orders, setOrders] = useState<Order[]>([]);
-  const [weeklySale, setWeeklySale] = useState<String>("0");
-  const [monthlySale, setMonthlySale] = useState<String>("0");
+
   const navigate = useNavigate();
   const componentRef = useRef(null);
 
@@ -47,59 +44,12 @@ export function Homepage() {
     data:orders,
     isLoading,
     isSuccess,
-    isError,
-    error
+    isError
 } = useGetOrdersQuery({},{pollingInterval:12000, skipPollingIfUnfocused:true});
 
+  const {data:weeklySale, isLoading:isWeeklyLoading} = useGetWeeklySalesQuery({});
+  const {data: monthlySale, isLoading:isMonthlyLoading} = useGetMonthlySalesQuery({});
 
-
-  const token = getCookie();
-
-
-  useEffect(() => {
-    console.log(orders);
-    const fetchOrders = async () => {
-      try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-        if (!backendUrl) {
-          throw new Error("Backend URL is not defined");
-        }
-
-        const weeklySales = await axios.get(`${backendUrl}/sales/week`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        
-
-        const monthlySales = await axios.get(`${backendUrl}/sales/month`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        // fetchedOrders = orders.orders.map((order: any) => ({
-        //   id: order.id,
-        //   customerName: order.customerName,
-        //   userId: order.userId,
-        //   orderDate: new Date(order.orderDate).toLocaleString(),
-        //   status: order.status,
-        //   products: order.products,
-        //   invoiceId: order.invoiceId,
-        // }));
-
-        setWeeklySale(weeklySales.data.totalSales);
-        setMonthlySale(monthlySales.data.totalSales);
-        // setOrders(fetchedOrders);
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      }
-    };
-
-    fetchOrders();
-  }, [orders]);
 
   const handleClick = (order: Order) => {
     navigate(`/orders/${order.id}`);
@@ -127,7 +77,7 @@ export function Homepage() {
         <Card x-chunk="dashboard-05-chunk-1">
           <CardHeader className="pb-2">
             <CardDescription>This Week</CardDescription>
-            <CardTitle className="text-4xl">${weeklySale}</CardTitle>
+            <CardTitle className="text-4xl">{isWeeklyLoading? <LoaderCircle className="animate-spin" />: weeklySale.totalSales}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-xs text-muted-foreground">
@@ -141,7 +91,7 @@ export function Homepage() {
         <Card x-chunk="dashboard-05-chunk-2">
           <CardHeader className="pb-2">
             <CardDescription>This Month</CardDescription>
-            <CardTitle className="text-4xl">${monthlySale}</CardTitle>
+            <CardTitle className="text-4xl">{isMonthlyLoading? <LoaderCircle className="animate-spin" />: monthlySale.totalSales}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-xs text-muted-foreground">

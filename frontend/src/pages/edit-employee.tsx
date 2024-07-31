@@ -1,3 +1,4 @@
+import { useGetEmployeeQuery, useUpdateEmployeeMutation } from "@/api/employee-slice";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,20 +11,18 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getCookie } from "@/utils/cookie-utils";
-
-import axios from "axios";
 import { LoaderCircle } from "lucide-react";
 import { ChangeEvent, useEffect, useState } from "react";
-import {  useNavigate, useParams } from "react-router-dom";
+import {   useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 
 export function EditEmployee() {
-  const [loading, setLoading] = useState(false);
+
   const { employeeId } = useParams();
-  const navigate = useNavigate();
-  const token = getCookie();
+  
+  const {data: employee,isSuccess} = useGetEmployeeQuery(employeeId);
+  const [updateEmployee,{isLoading}] = useUpdateEmployeeMutation();
 
   const [formValues, setFormValues] = useState<{
     email: string;
@@ -40,35 +39,21 @@ export function EditEmployee() {
   const [errors, setErrors] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetchEmployee = async () => {
+
       try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-        if (!backendUrl) {
-          throw new Error("Backend URL is not defined");
-        }
-
-        const response = await axios.get(`${backendUrl}/user/${employeeId}`,{
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        const employee = response.data.user;
-
+        if(employee && isSuccess){
         setFormValues({
-          email: employee.email,
-          name: employee.name,
-          role: employee.role,
-          unitsSold: employee.unitsSold,
+          email: employee.user.email,
+          name: employee.user.name,
+          role: employee.user.role,
+          unitsSold: parseInt(employee.user.unitsSold.toString()),
         });
+      }
       } catch (error) {
         console.error("Error fetching employee:", error);
       }
-    };
-
-    fetchEmployee();
-  }, [employeeId]);
+    
+  }, [isSuccess, employee]);
 
   const handleFieldChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -81,30 +66,15 @@ export function EditEmployee() {
       setErrors(["Email must not be empty."]);
       return;
     }
-    setLoading(true);
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL;
+      
 
-      if (!backendUrl) {
-        throw new Error("Backend URL is not defined");
-      }
-
-      const response = await axios.put(`${backendUrl}/user/${employeeId}`, {
-        email: formValues.email,
-      },{
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      await updateEmployee({employeeId: employeeId, email: formValues.email});
       toast.success("Successfully Updated Employee!");
-      navigate(`/employees/${employeeId}`);
     } catch (error) {
       toast.error("Could not update employee!");
       console.error("Error updating employee:", error);
-    }finally{
-      setLoading(false);
     }
   };
 
@@ -114,7 +84,7 @@ export function EditEmployee() {
         <CardTitle className="text-2xl">Edit Employee</CardTitle>
         <CardDescription>Modify the employee details below.</CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-4">
+      {isSuccess && <CardContent className="grid gap-4">
         <div className="grid gap-2">
           <Label htmlFor="name">Name</Label>
           <Input
@@ -162,11 +132,12 @@ export function EditEmployee() {
             ))}
           </div>
         )}
-        <Button onClick={handleSubmit} disabled={loading}>
-          {loading && <LoaderCircle className="animate-spin" />}
-        {!loading && <div>Submit</div>}
+        <Button onClick={handleSubmit} disabled={isLoading}>
+          {isLoading && <LoaderCircle className="animate-spin" />}
+        {!isLoading && <div>Submit</div>}
         </Button>
       </CardContent>
+}
     </Card>
   );
 }

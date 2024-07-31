@@ -39,7 +39,7 @@ export function EditProduct() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    console.log(product);
+
     if (product && isSuccess && !isInitialized) {
       setFormValues({
         name: product.product.name,
