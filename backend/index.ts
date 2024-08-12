@@ -7,6 +7,7 @@ import userRoutes from './routes/user-routes';
 import invoiceRoutes from './routes/invoice-routes';
 import salesRoutes from './routes/sale-routes';
 import dotenv from 'dotenv';
+import { Server } from 'http';
 dotenv.config();
 
 const app=express();
@@ -27,8 +28,8 @@ app.use('/api',invoiceRoutes);
 app.use('/api',salesRoutes);
 
 
-
-
-app.listen(PORT,()=>{
+const server: Server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-})
+});
+
+export { app, server };
