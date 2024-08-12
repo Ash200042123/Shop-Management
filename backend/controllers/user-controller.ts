@@ -1,8 +1,9 @@
 
 import { Request, Response } from 'express';
 import { deleteUser, getAllUsers, getUser, loginUser, signup, updateEmail, updatePassword, updateUnitSoldsByUserService } from '../services/user-service';
+import { DeleteUserParams, GetUserParams, LoginBody, SignupBody, UpdateEmailBody, UpdateEmailParams, UpdatePasswordBody, UpdateUnitSoldsByUserBody } from '../validators/user-validator';
 
-export const signupController = async (req: Request, res:Response)=>{
+export const signupController = async (req: Request<unknown, unknown, SignupBody>, res:Response)=>{
     const {email, password, role, name} = req.body;
 
     try{
@@ -19,7 +20,7 @@ export const signupController = async (req: Request, res:Response)=>{
     }
 };
 
-export const loginController = async (req: Request, res: Response) => {
+export const loginController = async (req: Request<unknown, unknown, LoginBody>, res: Response) => {
     const { email, password } = req.body;
   
     try {
@@ -35,7 +36,7 @@ export const loginController = async (req: Request, res: Response) => {
     }
   };
 
-export const updatePasswordController = async (req: Request, res: Response) => {
+export const updatePasswordController = async (req: Request<unknown, unknown, UpdatePasswordBody>, res: Response) => {
     const { userId, newPassword } = req.body;
   
     try {
@@ -51,7 +52,7 @@ export const updatePasswordController = async (req: Request, res: Response) => {
     }
   };
 
-  export const updateEmailController = async (req: Request, res: Response) => {
+  export const updateEmailController = async (req: Request<UpdateEmailParams, unknown, UpdateEmailBody>, res: Response) => {
     const userId = req.params.userId;
     const { email } = req.body;
   
@@ -69,7 +70,7 @@ export const updatePasswordController = async (req: Request, res: Response) => {
   };
 
 
-  export const getUserController = async(req:Request, res:Response)=>{
+  export const getUserController = async(req:Request<GetUserParams>, res:Response)=>{
     const userId = req.params.userId;
 
     try{
@@ -104,7 +105,7 @@ export const updatePasswordController = async (req: Request, res: Response) => {
 }
 
 
-export const updateUnitSoldsByUserController = async(req:Request, res:Response)=>{
+export const updateUnitSoldsByUserController = async(req:Request<unknown, unknown, UpdateUnitSoldsByUserBody>, res:Response)=>{
     const {userId, newUnitsSold} = req.body;
 
     try {
@@ -124,7 +125,7 @@ export const updateUnitSoldsByUserController = async(req:Request, res:Response)=
 
 
 
-export const deleteUserController = async(req:Request,res:Response)=>{
+export const deleteUserController = async(req:Request<DeleteUserParams>,res:Response)=>{
     
   const id = req.params.id;
   try {

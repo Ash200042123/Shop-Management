@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { deleteInvoiceByOrderService, deleteInvoiceByUserService, getAllInvoicesService, getInvoiceByInvoiceId, getInvoiceByOrderService, getInvoiceByUserService } from '../services/invoice-service';
+import { DeleteInvoice, GetInvoiceByInvoiceId, GetInvoiceByOrderId, GetInvoiceByUserId } from '../validators/invoice-validator';
 
 
-export async function getInvoiceByIdController(req: Request, res: Response) {
+export async function getInvoiceByIdController(req: Request<GetInvoiceByInvoiceId>, res: Response) {
     const { id } = req.params;
   
     try {
@@ -30,7 +31,7 @@ export async function getInvoiceByIdController(req: Request, res: Response) {
   }
 
 
-export const getInvoiceByOrderIdController = async(req:Request, res:Response)=>{
+export const getInvoiceByOrderIdController = async(req:Request<GetInvoiceByOrderId>, res:Response)=>{
 
     const  orderId  = parseInt(req.params.orderId);
 
@@ -48,7 +49,7 @@ export const getInvoiceByOrderIdController = async(req:Request, res:Response)=>{
 };
 
 
-export const getInvoiceByUserIdController = async(req:Request, res:Response)=>{
+export const getInvoiceByUserIdController = async(req:Request<GetInvoiceByUserId>, res:Response)=>{
 
     const  userId  = parseInt(req.params.userId);
 
@@ -107,6 +108,25 @@ export const deleteInvoiceByOrderController = async(req:Request, res:Response)=>
         
         const order = await deleteInvoiceByOrderService(orderId);
         return res.status(200).json({order});
+    }catch(error){
+        console.error('Error occured',error);
+        return res.status(500).json({error:'Internal server Error'});
+    }
+};
+
+
+export const deleteInvoiceByIdController = async(req:Request<DeleteInvoice>, res:Response)=>{
+
+    const invoiceId=req.params.invoiceId;
+
+    try{
+        const invoiceIdInt = parseInt(invoiceId);
+        if(!invoiceIdInt){
+            return res.status(400).json({message:"Invoice ID is required"});
+        }
+
+        const invoice = await deleteInvoiceByOrderService(invoiceIdInt);
+        return res.status(200).json({invoice});
     }catch(error){
         console.error('Error occured',error);
         return res.status(500).json({error:'Internal server Error'});

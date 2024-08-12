@@ -7,5 +7,6 @@ interface Order {
   orderDate: string;
   orderTotal: string; 
   products: Product[]; 
+  invoiceId: string
 }
 

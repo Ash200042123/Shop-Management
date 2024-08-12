@@ -35,78 +35,59 @@ import {
 import {  useParams } from "react-router-dom";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { getCookie } from "@/utils/cookie-utils";
+import { useGetOrderQuery, useUpdateOrderMutation } from "@/api/order-slice";
+import { toast } from "sonner";
 
 export function OrderDetailsPage() {
-  const [order, setOrder] = useState<Order>();
+  // const [order, setOrder] = useState<Order>();
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const { orderId } = useParams();
-  const token= getCookie();
-  const [loading, setLoading] = useState(false);
+
+  const [loader, setLoader] = useState(true);
+  const {
+    data:order,
+    isLoading,
+    isSuccess,
+} = useGetOrderQuery(orderId);
+const [updateOrder, { isLoading: isUpdating }] = useUpdateOrderMutation();
+
 
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-        if (!backendUrl) {
-          throw new Error("Backend URL is not defined");
+        if(isSuccess){
+          setLoader(false);
+        setSelectedStatus(order.order.status);
         }
-        const response = await axios.get(`${backendUrl}/orders/${orderId}`,{
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        setOrder(response.data.order);
-        setSelectedStatus(response.data.order.status);
-        console.log(response.data.order);
       } catch (error) {
         console.error("Error fetching orders:", error);
       }
     };
 
     fetchOrder();
-  }, [orderId]);
+  }, [orderId,isSuccess]);
 
-  if (!order) {
+  if (loader) {
     return <div>Loading...</div>;
   }
 
   const handleSubmit = async () => {
-    setLoading(true);
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-      if (!backendUrl) {
-        throw new Error("Backend URL is not defined");
-      }
-
-      const response = await axios.put(`${backendUrl}/orders`, {
-        orderId,
-        status: selectedStatus,
-      },{
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      console.log(response);
+      await updateOrder({orderId:parseInt(orderId??'',10),
+        status: selectedStatus}).unwrap();
+        toast.success("Order Status Updated Successfully!")
     } catch (error) {
+      toast.error("Could not update order status!")
       console.error("Error updating order:", error);
-    }finally{
-      setLoading(false);
     }
   };
 
-  return (
+  return ( isSuccess && !isLoading && order && (
     <Card className="w-full max-w-3xl overflow-hidden items-center justify-center">
       <CardHeader className="flex flex-row items-start bg-muted/50">
         <div className="grid gap-0.5">
           <CardTitle className="group flex items-center gap-2 text-lg">
-            Order {order.id}
+            Order {order.order.id}
             <Button
               size="icon"
               variant="outline"
@@ -116,7 +97,7 @@ export function OrderDetailsPage() {
               <span className="sr-only">Copy Order ID</span>
             </Button>
           </CardTitle>
-          <CardDescription>Date: {order.orderDate}</CardDescription>
+          <CardDescription>Date: {order.order.orderDate}</CardDescription>
         </div>
         <div className="ml-auto flex items-center gap-1">
           <Button size="sm" variant="outline" className="h-8 gap-1">
@@ -145,7 +126,7 @@ export function OrderDetailsPage() {
         <div className="grid gap-3">
           <div className="font-semibold">Order Details</div>
           <ul className="grid gap-3">
-            {order.products.map((product) => (
+            {order.order.products?.map((product:Product) => (
               <li
                 key={product.productId}
                 className="flex items-center justify-between"
@@ -161,7 +142,7 @@ export function OrderDetailsPage() {
           <ul className="grid gap-3">
             <li className="flex items-center justify-between font-semibold">
               <span className="text-muted-foreground">Total</span>
-              <span>৳{order.orderTotal}</span>
+              <span>৳{order.order.orderTotal}</span>
             </li>
           </ul>
         </div>
@@ -172,7 +153,7 @@ export function OrderDetailsPage() {
           <dl className="grid gap-3">
             <div className="flex items-center justify-between">
               <dt className="text-muted-foreground">Customer</dt>
-              <dd>{order.customerName}</dd>
+              <dd>{order.order.customerName}</dd>
             </div>
             {/* <div className="flex items-center justify-between">
                       <dt className="text-muted-foreground">Email</dt>
@@ -194,7 +175,7 @@ export function OrderDetailsPage() {
             <div className="flex items-center justify-between">
               <dt className="text-muted-foreground">Employee name</dt>
               <dd>
-                <a href="mailto:liam@acme.com">{order.employeeName}</a>
+                <a href="mailto:liam@acme.com">{order.order.employeeName}</a>
               </dd>
             </div>
           </dl>
@@ -229,35 +210,15 @@ export function OrderDetailsPage() {
               </dd>
             </div>
             <div className="flex items-center justify-center">
-              <Button type="submit" className="w-[70%]" onClick={handleSubmit} disabled={loading}>
-              {loading && <LoaderCircle className="animate-spin" />}
-              {!loading && <div>Update</div>}
+              <Button type="submit" className="w-[70%]" onClick={handleSubmit} disabled={isUpdating}>
+              {isUpdating && <LoaderCircle className="animate-spin" />}
+              {!isUpdating && <div>Update</div>}
               </Button>
             </div>
           </dl>
         </div>
       </CardContent>
-      {/* <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
-        <div className="text-xs text-muted-foreground">
-          Updated <time dateTime="2023-11-23">November 23, 2023</time>
-        </div>
-        <Pagination className="ml-auto mr-0 w-auto">
-          <PaginationContent>
-            <PaginationItem>
-              <Button size="icon" variant="outline" className="h-6 w-6">
-                <ChevronLeft className="h-3.5 w-3.5" />
-                <span className="sr-only">Previous Order</span>
-              </Button>
-            </PaginationItem>
-            <PaginationItem>
-              <Button size="icon" variant="outline" className="h-6 w-6">
-                <ChevronRight className="h-3.5 w-3.5" />
-                <span className="sr-only">Next Order</span>
-              </Button>
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </CardFooter> */}
     </Card>
+  )
   );
 }

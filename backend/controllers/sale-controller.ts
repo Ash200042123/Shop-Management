@@ -10,6 +10,7 @@ import {
   removeSale,
   updateSale,
 } from "../services/sale-service";
+import { CreateSale, DeleteSaleParams, GetSalesByProductParams, GetSalesByUserParams, UpdateSaleBody, UpdateSaleParams } from "../validators/sale-validator";
 
 export const getSalesForPastWeek = async (req: Request, res: Response) => {
   try {
@@ -31,7 +32,7 @@ export const getSalesForPastMonth = async (req: Request, res: Response) => {
   }
 };
 
-export const createSaleController = async (req: Request, res: Response) => {
+export const createSaleController = async (req: Request<unknown, unknown, CreateSale>, res: Response) => {
   const { userId, productId, quantity } = req.body;
 
   try {
@@ -54,14 +55,14 @@ export const createSaleController = async (req: Request, res: Response) => {
 export const getAllSalesController = async (req: Request, res: Response) => {
   try {
     const sales = await getAllSalesService();
-    return res.status(200).json(sales);
+    return res.status(200).json({sales:sales});
   } catch (error) {
     console.error("Error occurred:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-export const getSalesByUserController = async (req: Request, res: Response) => {
+export const getSalesByUserController = async (req: Request<GetSalesByUserParams>, res: Response) => {
   const { userId } = req.params;
 
   try {
@@ -78,7 +79,7 @@ export const getSalesByUserController = async (req: Request, res: Response) => {
 };
 
 export const getSalesByProductController = async (
-  req: Request,
+  req: Request<GetSalesByProductParams>,
   res: Response
 ) => {
   const { productId } = req.params;
@@ -96,16 +97,16 @@ export const getSalesByProductController = async (
   }
 };
 
-export const updateSaleController = async (req: Request, res: Response) => {
-  const { saleId } = req.params;
+export const updateSaleController = async (req: Request<UpdateSaleParams, unknown, UpdateSaleBody>, res: Response) => {
+  const { salesId } = req.params;
   const data = req.body;
 
   try {
-    if (!saleId) {
+    if (!salesId) {
       return res.status(400).json({ error: "Sale ID is required!" });
     }
 
-    const updatedSale = await updateSale(Number(saleId), data);
+    const updatedSale = await updateSale(Number(salesId), data);
     return res
       .status(200)
       .json({
@@ -132,7 +133,7 @@ export const getSalesProductWiseController = async (
   }
 };
 
-export const deleteSaleController = async (req: Request, res: Response) => {
+export const deleteSaleController = async (req: Request<DeleteSaleParams>, res: Response) => {
   const { saleId } = req.params;
 
   try {

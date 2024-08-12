@@ -27,62 +27,29 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import axios from "axios";
-import { getCookie } from "@/utils/cookie-utils";
 import ReactToPrint from "react-to-print";
 import { toast } from "sonner";
+import { useDeleteEmployeeMutation, useGetEmployeesQuery } from "@/api/employee-slice";
 
 export function Employees() {
-  const [employees, setEmployees] = useState<User[]>([]);
+  const {data:employees,isSuccess,isError,error} =useGetEmployeesQuery({});
   const [accessDenied, setAccessDenied] = useState<boolean>(false);
-  const token = getCookie();
+  const [deleteEmployee] = useDeleteEmployeeMutation();
   const componentRef = useRef(null);
 
   useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-        if (!backendUrl) {
-          throw new Error("Backend URL is not defined");
-        }
-
-        const response = await axios.get(`${backendUrl}/employees`,{
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        const fetchedEmployees = response.data.users.map((employee: any) => ({
-          id: employee.id,
-          email: employee.email,
-          name: employee.name,
-          role: employee.role,
-          unitsSold: employee.unitsSold,
-        }));
-        setEmployees(fetchedEmployees);
-      } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 403) {
-          setAccessDenied(true);
-        } 
-        console.error("Error fetching employees:", error);
-      }
-    };
-
-    fetchEmployees();
-  }, []);
+    if(isError && error){
+      setAccessDenied(true);
+    }
+  }, [isSuccess]);
 
   const handleDelete = async (id: number) => {
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-      if (!backendUrl) {
-        throw new Error("Backend URL is not defined");
-      }
-
-       await axios.delete(`${backendUrl}/employees/${id}`);
+       await deleteEmployee(id);
+       toast.success("Employee Deleted")
     } catch (error) {
       console.log(error);
+      toast.error("Could not delete employee")
     }
   };
 
@@ -103,36 +70,8 @@ export function Employees() {
   return (
     <Tabs defaultValue="all">
       <div className="flex items-center">
-        {/* <TabsList>
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="active">Active</TabsTrigger>
-                  <TabsTrigger value="draft">Draft</TabsTrigger>
-                  <TabsTrigger value="archived" className="hidden sm:flex">
-                    Archived
-                  </TabsTrigger>
-                </TabsList> */}
         <div className="ml-auto flex items-center gap-2">
-          {/* <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-8 gap-1">
-                        <ListFilter className="h-3.5 w-3.5" />
-                        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                          Filter
-                        </span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuCheckboxItem checked>
-                        Active
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem>Draft</DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem>
-                        Archived
-                      </DropdownMenuCheckboxItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu> */}
+          
           <ReactToPrint
               trigger={() => {
                 return <Button
@@ -187,7 +126,7 @@ export function Employees() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {employees.map((employee) => (
+                {isSuccess && employees.map((employee) => (
                   <TableRow key={employee.id}>
                     <TableCell className="hidden sm:table-cell">
                       <img

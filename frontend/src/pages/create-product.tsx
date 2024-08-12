@@ -1,3 +1,4 @@
+import { useAddProductMutation } from "@/api/product-slice";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,16 +11,13 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getCookie } from "@/utils/cookie-utils";
-
-import axios from "axios";
 import { LoaderCircle } from "lucide-react";
 import { ChangeEvent, useState } from "react";
 import { toast } from "sonner";
 
 
 export function CreateProduct() {
-  const [loading, setLoading] = useState(false);
+
   const [formValues, setFormValues] = useState<{
     name: string;
     description: string;
@@ -31,8 +29,8 @@ export function CreateProduct() {
     price: 0,
     quantity: 0,
   });
-  const token = getCookie();
   const [errors, setErrors] = useState<string[]>([]);
+  const [addProduct,{ isLoading}] = useAddProductMutation();
 
   const handleFieldChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -45,31 +43,19 @@ export function CreateProduct() {
       setErrors(["Price and Quantity must be greater than 0."]);
       return;
     }
-    setLoading(true);
+
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-      if (!backendUrl) {
-        throw new Error("Backend URL is not defined");
-      }
-
-      const response = await axios.post(`${backendUrl}/add-product`, {
+     
+      await addProduct({
         name: formValues.name,
         description: formValues.description,
-        price: formValues.price,
-        stock: formValues.quantity,
-      },{
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+        price: parseFloat(formValues.price.toString()),
+        stock: parseInt(formValues.quantity.toString()),
+      }).unwrap();
       toast.success("Product Created Successfully!");
     } catch (error) {
       toast.error("Could not create product!");
       console.error("Error creating product:", error);
-    }finally{
-      setLoading(false);
     }
   };
 
@@ -137,10 +123,10 @@ export function CreateProduct() {
         <Button
           onClick={handleSubmit}
           className="flex justify-center items-center w-1/2 mx-auto"
-          disabled={loading}
+          disabled={isLoading}
         >
-          {loading && <LoaderCircle className="animate-spin" />}
-          {!loading && <div>Submit</div>}
+          {isLoading && <LoaderCircle className="animate-spin" />}
+          {!isLoading && <div>Submit</div>}
         </Button>
       </CardContent>
     </Card>

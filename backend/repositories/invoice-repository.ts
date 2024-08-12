@@ -53,6 +53,15 @@ export const deleteInvoiceByOrderId = async(orderId:number)=>{
     });
 };
 
+export const deleteInvoiceByInvoiceId = async(invoiceId:number)=>{
+
+    return await prisma.invoice.delete({
+        where:{
+            id:invoiceId
+        }
+    });
+};
+
 
 export const deleteInvoiceByUser = async(userId:number)=>{
 

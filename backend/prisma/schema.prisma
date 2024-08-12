@@ -77,7 +77,7 @@ model Sales{
   userId Int
   productId Int
   user User @relation(fields: [userId], references: [id])
-  product Product @relation(fields: [productId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   saleDate DateTime @default(now())
   quantity Int
 }
